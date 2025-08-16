@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="static/styles2.css">
+    <title>EasyInvest - Calculadora de Investimentos</title>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <h1 class="logo">EasyInvest</h1>
+                <span class="version-badge">v1.0</span>
+                <span class="subtitle">Calculadora de Investimentos</span>
+            </div>
+            <div class="icon">
+                <span>$</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="title-section">
+            <h2 class="title">Resultado para: [Tipo de Investimento]</h2>
+            <div class="title-divider"></div>
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Dados de Entrada:</h3>
+            <div class="data-row">
+                <span class="data-label">Valor investido (R$):</span>
+                <span class="data-value">15.000</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Prazo do investimento (dias):</span>
+                <span class="data-value">300</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">taxas utilizadas:</span>
+                <span class="data-value">CDB/RDB</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Cálculos:</h3>
+            <div class="data-row">
+                <span class="data-label">Rendimento bruto:</span>
+                <span class="data-value">R$ 2.450,00</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Alíquota de IR:</span>
+                <span class="data-value">15%</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Valor de IR:</span>
+                <span class="data-value">R$ 367,50</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Valor Líquido:</span>
+                <span class="data-value">R$ 17.082,50</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Comparativo com o Tesouro Selic:</h3>
+            <div class="data-row">
+                <span class="data-label">Valor líquido do título público:</span>
+                <span class="data-value">R$ 16.850,00</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Diferença em R$:</span>
+                <span class="data-value">R$ 232,50</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Diferença em %:</span>
+                <span class="data-value">1,38%</span>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <p class="disclaimer-text">
+                *Os resultados apresentados neste site são apenas simulações e têm caráter informativo. Eles não representam
+                promessa, garantia ou sugestão de rentabilidade futura. Investimentos envolvem riscos, e os rendimentos
+                passados não asseguram retornos futuros.
+            </p>
+        </div>
+
+        <div class="button-container">
+            <button class="new-simulation-btn" onclick="newSimulation()">
+                Nova Simulação
+            </button>
+        </div>
+    </div>
+        <script src="static/script2.js"></script>
+</body>
+</html>

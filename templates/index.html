@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyInvest 1.0 - Calculadora de Investimentos</title>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <h1 class="title">EasyInvest</h1>
+                        <div class="header-info">
+                            <span class="version-badge">v1.0</span>
+                            <span class="subtitle">Calculadora de Investimentos</span>
+                        </div>
+                    </div>
+                    <div class="header-icon">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="header-divider"></div>
+            </header>
+
+            <!-- Calculation Options -->
+            <div class="section">
+                <h2 class="section-title">Opções de Cálculo:</h2>
+                <div class="options-container">
+                    <button class="option-button selected" data-option="CDB/RDB">[1] CDB/RDB</button>
+                    <button class="option-button" data-option="LCI/LCA">[2] LCI/LCA</button>
+                    <button class="option-button" data-option="Tesouro Direito">[3] Tesouro Direito</button>
+                </div>
+            </div>
+
+            <!-- Market Indicators -->
+            <div class="section">
+                <h2 class="section-title">Indicadores do Mercado:</h2>
+                <div class="indicators-grid">
+                    <div class="indicator-card">
+                        <div class="indicator-rate">CDI: <span id="cdi-rate">12,5%</span> ao ano</div>
+                        <div class="indicator-update">Última atualização: <span id="cdi-update">15/08/2025</span></div>
+                    </div>
+                    <div class="indicator-card">
+                        <div class="indicator-rate">SELIC: <span id="selic-rate">12,25%</span> ao ano</div>
+                        <div class="indicator-update">Última atualização: <span id="selic-update">15/08/2025</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculator Form -->
+            <div class="calculator-form">
+                <div class="form-group">
+                    <label class="form-label">Valor Investido (R$):</label>
+                    <input type="text" id="investment-value" class="form-input" value="1000">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Prazo(dias):</label>
+                    <input type="text" id="time-period" class="form-input" value="360">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">% do CDI:</label>
+                    <input type="text" id="cdi-percentage" class="form-input" value="110">
+                </div>
+
+                <div class="form-group">
+                    <button id="calculate-btn" class="calculate-button">Calcular</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/script.js"></script>
+</body>
+</html>
