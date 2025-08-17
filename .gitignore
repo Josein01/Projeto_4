@@ -1,0 +1,14 @@
+# Regras do Backend (Python)
+backend/venv/
+backend/__pycache__/
+backend/app.db
+backend/instance/
+
+# Regras do Frontend (geral)
+# Adicionado para o caso de usarem ferramentas como Node.js no futuro
+frontend/node_modules/
+
+# Arquivos de IDEs e de sistema operacional
+.vscode/
+.idea/
+*.DS_Store
