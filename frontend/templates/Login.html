@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyInvest</title>
+    <link rel="stylesheet" href="../static/styles_login.css">
+</head>
+<body>
+    <div class="container">
+        <div class="main-content">
+            <!-- Título principal -->
+            <div class="header">
+                <h1 class="title">EasyInvest</h1>
+                <p class="subtitle">
+                    Bem vindo(a) ao sistema web focado na simulação e no cálculo de investimentos em renda fixa.
+                </p>
+            </div>
+
+            <!-- Botão entrar -->
+            <button id="openModalBtn" class="enter-btn">Entrar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Login -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button id="backBtn" class="back-btn" style="display: none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m12 19-7-7 7-7"/>
+                        <path d="m19 12H5"/>
+                    </svg>
+                </button>
+                <h2 id="modalTitle" class="modal-title">Fazer Login</h2>
+            </div>
+
+            <div class="modal-body">
+                <!-- Formulário de Login -->
+                <form id="loginForm" class="form">
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" placeholder="seu@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Senha</label>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="forgot-password">
+                        <button type="button" id="forgotPasswordBtn" class="link-btn">
+                            Esqueceu a senha?
+                        </button>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Logar</button>
+
+                    <div class="signup-link">
+                        <button type="button" id="signupBtn" class="link-btn">
+                            Não possui uma conta? Vamos criar
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Formulário de Recuperação -->
+                <form id="recoveryForm" class="form" style="display: none;">
+                    <div class="form-group">
+                        <label for="recoveryEmail">Email</label>
+                        <input type="email" id="recoveryEmail" placeholder="seu@email.com" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Recuperar conta do Email</button>
+                </form>
+
+                <!-- Formulário de Cadastro -->
+                <form id="signupForm" class="form" style="display: none;">
+                    <div class="form-group">
+                        <label for="firstName">Nome</label>
+                        <input type="text" id="firstName" placeholder="Seu nome" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">Sobrenome</label>
+                        <input type="text" id="lastName" placeholder="Seu sobrenome" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" placeholder="seu@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupPassword">Senha</label>
+                        <input type="password" id="signupPassword" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirmar Senha</label>
+                        <input type="password" id="confirmPassword" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Criar conta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/script_login.js"></script>
+</body>
+</html>
