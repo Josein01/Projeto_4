@@ -1,5 +1,3 @@
-# Backend/config.py
-
 import os
 
 class Config:

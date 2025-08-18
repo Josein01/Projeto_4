@@ -1,5 +1,3 @@
-# Backend/app/routes.py
-
 from flask import render_template, current_app, request, jsonify
 # from app.models import User # Comentado - Não usamos o modelo de usuário
 # from app import db # Comentado - Não usamos o banco de dados

@@ -1,5 +1,3 @@
-# Backend/app/services.py
-
 import requests
 from datetime import datetime
 
