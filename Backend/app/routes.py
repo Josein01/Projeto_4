@@ -8,11 +8,11 @@ from . import services
 
 @current_app.route('/')
 def home():
-    return render_template('index.html')
-
-@current_app.route('/login')
-def login_page():
     return render_template('Login.html')
+
+@current_app.route('/Calculadora')
+def login_page():
+    return render_template('index.html.html')
 
 @current_app.route('/resultados')
 def resultados_page():
