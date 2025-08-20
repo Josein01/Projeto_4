@@ -129,3 +129,48 @@ A aplicação expõe os seguintes endpoints de API (além de servir as páginas 
 * `POST /api/simular/cdb`: (Requer autenticação) Simula um investimento em CDB.
 
 ---
+
+# Branches, Fluxo e Pull Requests
+
+## O que é uma branch?
+Uma **branch** é uma “linha do tempo” paralela do seu código.  
+- `main` (ou `master`): versão estável, pronta para produção.  
+- Branches de feature/bugfix: onde a gente trabalha sem quebrar o que está em `main`.
+---
+
+## Criar e trocar de branch
+
+Crie uma branch nova a partir da `main`:
+
+```bash
+# 1) garanta que está na main e atualizada
+git checkout main
+git pull origin main
+
+# 2) crie e mude para a nova branch
+git checkout -b feature/nome-curto-da-tarefa
+
+Voltar para outra branch existente:
+git checkout main
+
+
+Listar branches:
+git branch          # locais
+git branch -r       # remotas
+git branch -a       # todas
+
+Enviar sua branch pro remoto:
+git push -u origin feature/nome-curto-da-tarefa
+
+> Dica: use nomes claros, ex.: `feature/login-google`, `fix/validação-email`.
+
+
+## Glossário rápido
+- **Repo**: repositório.
+- **Branch**: linha de desenvolvimento.
+- **Commit**: pacote de mudanças.
+- **PR (Pull Request)**: pedido de fusão.
+- **Merge**: combinar branches.
+- **Rebase**: reaplicar commits por cima de outra base.
+- **Conflict**: mudanças conflitantes no mesmo trecho.
+```
