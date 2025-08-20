@@ -7,17 +7,20 @@ from . import services
 # --- ROTAS PARA SERVIR AS PÁGINAS DO FRONT-END ---
 
 @current_app.route('/')
+@current_app.route('/Calculadora') # Mantemos /Calculadora para garantir que funcione
 def home():
-    return render_template('Login.html')
+    """Esta rota servirá o arquivo index.html como página principal."""
+    return render_template('index.html')
 
-@current_app.route('/Calculadora')
+@current_app.route('/login')
 def login_page():
-    return render_template('index.html.html')
+    """Esta rota servirá a página Login.html."""
+    return render_template('Login.html')
 
 @current_app.route('/resultados')
 def resultados_page():
+    """Esta rota servirá a página Resultados.html."""
     return render_template('Resultados.html')
-
 
 # --- ROTAS DA API (COM MOCK DE AUTENTICAÇÃO) ---
 
@@ -45,10 +48,8 @@ def get_indicadores():
 @current_app.route('/api/simular/cdb', methods=['POST'])
 @jwt_required()
 def simular_investimento_cdb():
-    usuario_logado = get_jwt_identity()
-    print(f"DEBUG: Simulação CDB pedida por: {usuario_logado}")
     dados_entrada = request.get_json()
-    if not dados_entrada or not all(k in dados_entrada for k in ('valor_inicial', 'prazo_dias', 'percentual_cdi')): return jsonify({"erro": "Parâmetros obrigatórios ausentes."}), 400
+    if not all(k in dados_entrada for k in ('valor_inicial', 'prazo_dias', 'percentual_cdi')): return jsonify({"erro": "Parâmetros obrigatórios ausentes."}), 400
     try:
         resultado = services.simular_cdb(float(dados_entrada['valor_inicial']), int(dados_entrada['prazo_dias']), float(dados_entrada['percentual_cdi']))
         if "erro" in resultado: return jsonify(resultado), 503
@@ -56,16 +57,28 @@ def simular_investimento_cdb():
     except (ValueError, TypeError):
         return jsonify({"erro": "Parâmetros inválidos."}), 400
 
-
 @current_app.route('/api/simular/lci-lca', methods=['POST'])
 @jwt_required()
 def simular_investimento_lci_lca():
-    usuario_logado = get_jwt_identity()
-    print(f"DEBUG: Simulação LCI/LCA pedida por: {usuario_logado}")
     dados_entrada = request.get_json()
-    if not dados_entrada or not all(k in dados_entrada for k in ('valor_inicial', 'prazo_dias', 'percentual_cdi')): return jsonify({"erro": "Parâmetros obrigatórios ausentes."}), 400
+    if not all(k in dados_entrada for k in ('valor_inicial', 'prazo_dias', 'percentual_cdi')): return jsonify({"erro": "Parâmetros obrigatórios ausentes."}), 400
     try:
         resultado = services.simular_lci_lca(float(dados_entrada['valor_inicial']), int(dados_entrada['prazo_dias']), float(dados_entrada['percentual_cdi']))
+        if "erro" in resultado: return jsonify(resultado), 503
+        return jsonify(resultado)
+    except (ValueError, TypeError):
+        return jsonify({"erro": "Parâmetros inválidos."}), 400
+
+# --- NOVA ROTA ADICIONADA ---
+@current_app.route('/api/simular/tesouro-selic', methods=['POST'])
+@jwt_required()
+def simular_investimento_tesouro_selic():
+    dados_entrada = request.get_json()
+    # Note que Tesouro Selic não precisa do 'percentual_cdi'
+    if not all(k in dados_entrada for k in ('valor_inicial', 'prazo_dias')):
+        return jsonify({"erro": "Parâmetros 'valor_inicial' e 'prazo_dias' são obrigatórios."}), 400
+    try:
+        resultado = services.simular_tesouro_selic(float(dados_entrada['valor_inicial']), int(dados_entrada['prazo_dias']))
         if "erro" in resultado: return jsonify(resultado), 503
         return jsonify(resultado)
     except (ValueError, TypeError):
