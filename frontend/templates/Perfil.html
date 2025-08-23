@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil</title>
+    <link rel="stylesheet" href="../static/styles_perfil.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar">
+            <button id="sidebar-toggle" class="sidebar-toggle">
+                <i data-lucide="chevron-left"></i>
+            </button>
+
+            <div class="sidebar-content">
+                <div class="logo">
+                    <h1 class="logo-text">EasyInvest</h1>
+                </div>
+
+                <div class="profile-section">
+                    <div class="avatar">
+                        <span>JS</span>
+                    </div>
+                    <div class="profile-info">
+                        <p class="profile-name">João Silva</p>
+                        <p class="profile-email">joao@email.com</p>
+                    </div>
+                </div>
+
+                <div class="new-calc-section">
+                    <!-- Added btn-text class to span for proper hiding when collapsed -->
+                    <button class="new-calc-btn" onclick="setActiveTab('historico')">
+                        <i data-lucide="trending-up"></i>
+                        <span class="btn-text">Novo Cálculo</span>
+                    </button>
+                </div>
+
+                <nav class="nav-menu">
+                    <button class="nav-btn active" data-tab="historico" onclick="setActiveTab('historico')">
+                        <i data-lucide="history"></i>
+                        <span>Histórico</span>
+                    </button>
+                    <button class="nav-btn" data-tab="dashboard" onclick="setActiveTab('dashboard')">
+                        <i data-lucide="bar-chart-3"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button class="nav-btn" data-tab="perfil" onclick="setActiveTab('perfil')">
+                        <i data-lucide="user"></i>
+                        <span>Editar Perfil</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="sidebar-footer">
+                <button class="nav-btn logout-btn">
+                    <i data-lucide="log-out"></i>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Histórico Tab -->
+            <div id="historico-tab" class="tab-content active">
+                <div id="empty-state" class="empty-state">
+                    <div class="empty-icon">
+                        <i data-lucide="trending-up"></i>
+                    </div>
+                    <h3>Nenhum cálculo realizado</h3>
+                    <p>Comece a fazer seus cálculos de investimento e acompanhe seus resultados aqui!</p>
+                    <button class="btn btn-primary">Faça os cálculos</button>
+                </div>
+
+                <div id="history-content" class="history-content" style="display: none;">
+                    <div class="content-header">
+                        <h2>Histórico de Cálculos</h2>
+                        <span id="copied-message" class="success-message"></span>
+                    </div>
+                    <div id="history-list" class="history-list"></div>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboard-tab" class="tab-content">
+                <h2>Dashboard</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <i data-lucide="dollar-sign"></i>
+                            <div>
+                                <p class="stat-label">Valor Investido</p>
+                                <p class="stat-value">R$ 35.000</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <i data-lucide="calendar"></i>
+                            <div>
+                                <p class="stat-label">Prazo</p>
+                                <p class="stat-value">180 dias</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <i data-lucide="percent"></i>
+                            <div>
+                                <p class="stat-label">Taxa Utilizada</p>
+                                <p class="stat-value">115% CDI</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-content">
+                            <i data-lucide="trending-up"></i>
+                            <div>
+                                <p class="stat-label">Rendimento Bruto</p>
+                                <p class="stat-value">R$ 41.500</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Evolução do Investimento</h3>
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Comparativo Mensal</h3>
+                        <canvas id="barChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Distribuição de Investimentos</h3>
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-card">
+                        <p class="detail-label">Alíquota de IR</p>
+                        <p class="detail-value">15%</p>
+                    </div>
+                    <div class="detail-card">
+                        <p class="detail-label">Valor de IR</p>
+                        <p class="detail-value">R$ 975</p>
+                    </div>
+                    <div class="detail-card">
+                        <p class="detail-label">Valor Líquido</p>
+                        <p class="detail-value">R$ 40.525</p>
+                    </div>
+                    <div class="detail-card">
+                        <p class="detail-label">Valor Líquido Título Público</p>
+                        <p class="detail-value">R$ 39.800</p>
+                    </div>
+                    <div class="detail-card">
+                        <p class="detail-label">Diferença em R$</p>
+                        <p class="detail-value positive">+R$ 725</p>
+                    </div>
+                    <div class="detail-card">
+                        <p class="detail-label">Diferença em %</p>
+                        <p class="detail-value positive">+1.82%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Perfil Tab -->
+            <div id="perfil-tab" class="tab-content">
+                <div class="profile-header">
+                    <h2>Editar Perfil</h2>
+                    <p>Gerencie suas informações pessoais e configurações da conta</p>
+                </div>
+
+                <div id="success-message" class="success-alert" style="display: none;">
+                    <i data-lucide="check"></i>
+                    <span></span>
+                </div>
+
+                <div class="profile-card">
+                    <div class="card-header">
+                        <i data-lucide="user"></i>
+                        <h3>Foto do Perfil</h3>
+                    </div>
+                    <div class="photo-section">
+                        <div class="avatar-large">
+                            <span>JS</span>
+                        </div>
+                        <div>
+                            <button class="btn btn-outline">
+                                <i data-lucide="camera"></i>
+                                Alterar Foto
+                            </button>
+                            <p class="help-text">Formatos aceitos: JPG, PNG. Tamanho máximo: 5MB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <h3>Informações Pessoais</h3>
+                    <div class="form-group">
+                        <label>Primeiro Nome</label>
+                        <div class="input-group">
+                            <input type="text" id="firstName" value="João" disabled>
+                            <button class="btn btn-outline btn-sm" onclick="toggleEdit('firstName')">Editar</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Sobrenome</label>
+                        <div class="input-group">
+                            <input type="text" id="lastName" value="Silva" disabled>
+                            <button class="btn btn-outline btn-sm" onclick="toggleEdit('lastName')">Editar</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <div class="input-group">
+                            <input type="email" id="email" value="joao.silva@email.com" disabled>
+                            <button class="btn btn-outline btn-sm" onclick="toggleEdit('email')">Editar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card password-card">
+                    <div class="password-header">
+                        <div class="card-header">
+                            <i data-lucide="lock"></i>
+                            <h3>Alterar Senha</h3>
+                        </div>
+                        <button class="btn btn-primarye" onclick="togglePasswordForm()">Alterar Senha</button>
+                    </div>
+
+                    <div id="password-form" class="password-form" style="display: none;">
+                        <div class="form-group">
+                            <label>Senha Atual</label>
+                            <input type="password" id="currentPassword">
+                        </div>
+                        <div class="form-group">
+                            <label>Nova Senha</label>
+                            <input type="password" id="newPassword">
+                        </div>
+                        <div class="form-group">
+                            <label>Repetir Nova Senha</label>
+                            <input type="password" id="confirmPassword">
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-primario" onclick="savePassword()">Salvar Senha</button>
+                            <button class="btn btn-foraline" onclick="togglePasswordForm()">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+                <hr class="solid"><br>
+
+                <button class="btn btn-danger btn-full">Apagar Perfil</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/scriptPerfil.js"></script>
+</body>
+</html>
