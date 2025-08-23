@@ -25,21 +25,18 @@ class Calculo(db.Model):
     prazo = db.Column(db.Integer, nullable=False)
     taxa = db.Column(db.String(45), nullable=False)
     resultadocalculo = db.Column(db.Numeric(20, 2), nullable=False)
+    data_calculo = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     
-    
-    # Chaves estrangeiras corretas
+    # Chaves estrangeiras
     usuario_idusuario = db.Column(db.Integer, db.ForeignKey('usuario.idusuario'))
     investimento_idinvestimento = db.Column(db.Integer, db.ForeignKey('investimento.idinvestimento'))
+
+    # --- RELACIONAMENTO ADICIONADO AQUI ---
+    # Cria o "atalho" .investimento para acessar o objeto Investimento relacionado
+    investimento = db.relationship('Investimento', backref='calculos')
+
 
 class Investimento(db.Model):
     __tablename__ = 'investimento'
     idinvestimento = db.Column(db.Integer, primary_key=True)
     tipoinvestimento = db.Column(db.String(45), nullable=False)
-
-class Indicador(db.Model):
-    __tablename__ = 'indicadores'
-
-    idindicadores = db.Column(db.Integer, primary_key=True)
-    tipoindicadores = db.Column(db.String(45), nullable=False)
-    taxaanual = db.Column(db.String(45), nullable=False)
-    dataatualiza = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
