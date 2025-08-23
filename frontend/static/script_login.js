@@ -21,53 +21,41 @@ openModalBtn.addEventListener("click", openModal)
 backBtn.addEventListener("click", goBackToLogin)
 forgotPasswordBtn.addEventListener("click", goToRecovery)
 signupBtn.addEventListener("click", goToSignup)
-
-// Fechar modal clicando fora
 modal.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    closeModal()
-  }
+  if (e.target === modal) closeModal()
 })
 
-// Handlers dos formulários
+// Handlers dos formulários que agora chamam a API
 loginForm.addEventListener("submit", handleLogin)
 recoveryForm.addEventListener("submit", handleRecovery)
 signupForm.addEventListener("submit", handleSignup)
 
-// Funções principais
+// Funções de controle do Modal
 function openModal() {
   modal.classList.add("show")
   currentMode = "login"
   updateModalContent()
 }
-
 function closeModal() {
   modal.classList.remove("show")
   resetForms()
 }
-
 function goToRecovery() {
   currentMode = "recovery"
   updateModalContent()
 }
-
 function goToSignup() {
   currentMode = "signup"
   updateModalContent()
 }
-
 function goBackToLogin() {
   currentMode = "login"
   updateModalContent()
 }
-
 function updateModalContent() {
-  // Esconder todos os formulários
   loginForm.style.display = "none"
   recoveryForm.style.display = "none"
   signupForm.style.display = "none"
-
-  // Mostrar/esconder botão de voltar
   if (currentMode === "login") {
     backBtn.style.display = "none"
     modalTitle.textContent = "Fazer Login"
@@ -82,48 +70,96 @@ function updateModalContent() {
     signupForm.style.display = "flex"
   }
 }
-
 function resetForms() {
-  loginForm.reset()
-  recoveryForm.reset()
-  signupForm.reset()
-  currentMode = "login"
+  loginForm.reset();
+  recoveryForm.reset();
+  signupForm.reset();
+  currentMode = "login";
 }
 
-// Handlers dos formulários
-function handleLogin(e) {
-  e.preventDefault()
-  const email = document.getElementById("email").value
-  const password = document.getElementById("password").value
+// --- LÓGICA DE INTEGRAÇÃO COM A API E REDIRECIONAMENTOS ---
 
-  console.log("Login:", { email, password })
-  // Aqui você adicionaria a lógica de login
-  alert("Login realizado com sucesso!")
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const loginData = { email: email, senha: password };
+
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(loginData)
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.erro || 'Falha no login.');
+    
+    // Salva o token de acesso no navegador
+    localStorage.setItem('accessToken', result.access_token);
+    
+    // **REDIRECIONAMENTO PARA A CALCULADORA (index.html)**
+    window.location.href = '/'; 
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
-function handleRecovery(e) {
-  e.preventDefault()
-  const recoveryEmail = document.getElementById("recoveryEmail").value
+async function handleRecovery(e) {
+  e.preventDefault();
+  const recoveryEmail = document.getElementById("recoveryEmail").value;
+  
+  try {
+    const response = await fetch('/api/recuperar-senha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: recoveryEmail })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.erro || 'Falha ao enviar e-mail.');
 
-  console.log("Recuperação:", { recoveryEmail })
-  // Aqui você adicionaria a lógica de recuperação
-  alert("Email de recuperação enviado!")
+    alert(result.mensagem);
+
+    // **REDIRECIONAMENTO DE VOLTA PARA A TELA DE LOGIN**
+    goBackToLogin();
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
-function handleSignup(e) {
-  e.preventDefault()
-  const firstName = document.getElementById("firstName").value
-  const lastName = document.getElementById("lastName").value
-  const email = document.getElementById("signupEmail").value
-  const password = document.getElementById("signupPassword").value
-  const confirmPassword = document.getElementById("confirmPassword").value
+async function handleSignup(e) {
+  e.preventDefault();
+  const firstName = document.getElementById("firstName").value;
+  const lastName = document.getElementById("lastName").value;
+  const email = document.getElementById("signupEmail").value;
+  const password = document.getElementById("signupPassword").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
 
   if (password !== confirmPassword) {
-    alert("As senhas não coincidem!")
-    return
+    alert("As senhas não coincidem!");
+    return;
   }
 
-  console.log("Cadastro:", { firstName, lastName, email, password })
-  // Aqui você adicionaria a lógica de cadastro
-  alert("Conta criada com sucesso!")
+  const signupData = { 
+    primeiro_nome: firstName, 
+    sobrenome: lastName, 
+    email: email, 
+    senha: password 
+  };
+  
+  try {
+    const response = await fetch('/api/registrar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(signupData)
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.erro || 'Falha ao criar conta.');
+
+    alert(result.mensagem);
+
+    // **REDIRECIONAMENTO DE VOLTA PARA A TELA DE LOGIN**
+    goBackToLogin(); 
+  } catch (error) {
+    alert(error.message);
+  }
 }

@@ -1,21 +1,31 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 class User(db.Model):
-    """
-    Modelo do banco de dados para um Usuário.
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    primeiro_nome = db.Column(db.String(64), index=True, nullable=False)
-    sobrenome = db.Column(db.String(64), index=True, nullable=False)
-    email = db.Column(db.String(120), index=True, unique=True, nullable=False)
-    senha_hash = db.Column(db.String(256))
+    __tablename__ = 'usuario'
+    
+    idusuario = db.Column(db.Integer, primary_key=True)
+    nomeusuario = db.Column(db.String(15), nullable=False)
+    sobrenomeusuario = db.Column(db.String(100), nullable=False)
+    emailusuario = db.Column(db.String(100), unique=True, index=True, nullable=False)
+    senhausuario = db.Column(db.String(300), nullable=False)
+    calculos = db.relationship('Calculo', backref='autor', lazy='dynamic')
 
     def set_password(self, password):
-        self.senha_hash = generate_password_hash(password)
+        self.senhausuario = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.senha_hash, password)
+        return check_password_hash(self.senhausuario, password)
 
-    def __repr__(self):
-        return f'<User {self.email}>'
+class Calculo(db.Model):
+    __tablename__ = 'calculos'
+
+    idcalculos = db.Column(db.Integer, primary_key=True)
+    valor = db.Column(db.Numeric(10, 2), nullable=False)
+    prazo = db.Column(db.Integer, nullable=False)
+    taxa = db.Column(db.String(45), nullable=False)
+    resultadocalculo = db.Column(db.Numeric(20, 2), nullable=False)
+    tipo_investimento = db.Column(db.String(45))
+    data_calculo = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    usuario_idusuario = db.Column(db.Integer, db.ForeignKey('usuario.idusuario'))

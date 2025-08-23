@@ -1,7 +1,7 @@
 import os
 from flask import Flask
 from .config import Config
-# from flask_sqlalchemy import SQLAlchemy # Comentado
+from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 
@@ -12,7 +12,7 @@ TEMPLATE_FOLDER = os.path.join(project_root_path, 'frontend', 'templates')
 STATIC_FOLDER = os.path.join(project_root_path, 'frontend', 'static')
 
 # --- INICIALIZAÇÃO DAS EXTENSÕES ---
-# db = SQLAlchemy() # Comentado
+db = SQLAlchemy() 
 bcrypt = Bcrypt()
 jwt = JWTManager()
 
@@ -26,7 +26,7 @@ def create_app(config_class=Config):
     
     app.config.from_object(config_class)
 
-    # db.init_app(app) # Comentado
+    db.init_app(app) 
     bcrypt.init_app(app)
     jwt.init_app(app)
 

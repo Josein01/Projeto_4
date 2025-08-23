@@ -1,46 +1,38 @@
-// State management
-let selectedCalculation = "CDB/RDB"
+// frontend/static/script.js
 
-// DOM elements
-const optionButtons = document.querySelectorAll(".option-button")
-const calculateButton = document.getElementById("calculate-btn")
+// Estado da Aplicação
+let selectedCalculation = "CDB/RDB";
 
-// Função de inicialização
+// Elementos do DOM
+const optionButtons = document.querySelectorAll(".option-button");
+const calculateButton = document.getElementById("calculate-btn");
+
+// Função de Inicialização
 function init() {
-  // Configura os eventos de clique nos botões de opção
   optionButtons.forEach((button) => {
     button.addEventListener("click", function () {
-      optionButtons.forEach((btn) => btn.classList.remove("selected"))
-      this.classList.add("selected")
-      selectedCalculation = this.getAttribute("data-option")
-    })
-  })
+      optionButtons.forEach((btn) => btn.classList.remove("selected"));
+      this.classList.add("selected");
+      selectedCalculation = this.getAttribute("data-option");
+    });
+  });
 
-  // Configura o evento de clique no botão de calcular
   calculateButton.addEventListener("click", () => {
-    const investmentValue = document.getElementById("investment-value").value
-    const timePeriod = document.getElementById("time-period").value
-    const cdiPercentage = document.getElementById("cdi-percentage").value
+    const investmentValue = document.getElementById("investment-value").value;
+    const timePeriod = document.getElementById("time-period").value;
+    const cdiPercentage = document.getElementById("cdi-percentage").value;
+    performCalculation(selectedCalculation, investmentValue, timePeriod, cdiPercentage);
+  });
 
-    // Chama a função que se comunica com o back-end
-    performCalculation(selectedCalculation, investmentValue, timePeriod, cdiPercentage)
-  })
-
-  // [MODIFICADO] Busca os indicadores reais da API ao carregar a página
-  fetchMarketIndicators()
+  fetchMarketIndicators();
 }
 
-/**
- * [NOVO] Busca os indicadores de mercado (CDI/SELIC) da nossa API.
- */
+// Busca os indicadores de mercado da API
 async function fetchMarketIndicators() {
   try {
     const response = await fetch('/api/indicadores');
     if (!response.ok) throw new Error('Falha ao buscar indicadores.');
-    
     const data = await response.json();
-
-    // Atualiza a tela com os dados recebidos do back-end
     document.getElementById("cdi-rate").textContent = data.cdi;
     document.getElementById("cdi-update").textContent = new Date(data.data_referencia).toLocaleDateString('pt-BR');
     document.getElementById("selic-rate").textContent = data.selic;
@@ -51,21 +43,26 @@ async function fetchMarketIndicators() {
 }
 
 /**
- * [MODIFICADO] Envia os dados para o back-end e processa a simulação.
+ * Função principal que realiza o cálculo.
  */
 async function performCalculation(type, value, period, cdiPercent) {
-  // Verifica se o usuário está logado buscando o token
+  // =================================================================
+  // AQUI ESTÁ A CORREÇÃO QUE VOCÊ IDENTIFICOU!
+  // 1. O script primeiro tenta pegar o token de acesso no navegador.
   const token = localStorage.getItem('accessToken');
+
+  // 2. Se o token NÃO existir, ele avisa o usuário e o redireciona para a página de login.
   if (!token) {
     alert('Você precisa estar logado para realizar uma simulação.');
-    window.location.href = '/login';
-    return;
+    window.location.href = '/login'; // Redireciona para a tela de login
+    return; // Interrompe a função aqui mesmo.
   }
-  
+  // =================================================================
+
+  // Se o token existir, o resto do código continua normalmente...
   let apiUrl = '';
   let simulationData = {};
 
-  // Define a URL da API e os dados a serem enviados
   if (type === 'CDB/RDB' || type === 'LCI/LCA') {
     apiUrl = (type === 'CDB/RDB') ? '/api/simular/cdb' : '/api/simular/lci-lca';
     simulationData = {
@@ -80,32 +77,26 @@ async function performCalculation(type, value, period, cdiPercent) {
       prazo_dias: parseInt(period)
     };
   } else {
-    return; // Se o tipo for desconhecido, não faz nada
+    return;
   }
 
   try {
-    // Faz a chamada POST para a API, enviando os dados e o token de autenticação
     const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(simulationData)
     });
 
     const result = await response.json();
     if (!response.ok) throw new Error(result.erro || 'Erro na simulação.');
 
-    // Salva o resultado e redireciona para a página de resultados
     localStorage.setItem('simulationResult', JSON.stringify(result));
     window.location.href = '/resultados';
 
   } catch (error) {
-    console.error('Erro na simulação:', error);
     alert(error.message);
   }
 }
 
-// Inicializa o script quando a página termina de carregar
-document.addEventListener("DOMContentLoaded", init)
+// Inicializa o script
+document.addEventListener("DOMContentLoaded", init);
