@@ -3,11 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles2.css') }}">
+    <link rel="stylesheet" href="../static/styles2.css">
     <title>EasyInvest - Resultado da Simulação</title>
 </head>
 <body>
     <div class="header">
+        <!-- Adicionando círculo de perfil no header -->
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo">EasyInvest</div>
+                <div class="version-badge">v1.0</div>
+                <div class="subtitle">Simulador de Investimentos</div>
+            </div>
+            <a href="/perfil" class="profile-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="currentColor"/>
+                    <path d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z" fill="currentColor"/>
+                </svg>
+            </a>
+        </div>
     </div>
 
     <div class="main-content">
@@ -76,6 +90,6 @@
             </button>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='script2.js') }}"></script>
+    <script src="../static/script2.js"></script>
 </body>
 </html>

@@ -194,8 +194,7 @@ body {
 
 .new-calc-btn:hover {
   background: #2a2557;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .nav-menu {
@@ -250,8 +249,7 @@ body {
 
 .nav-btn:hover {
   background: #f3f4f6;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .nav-btn.active {
@@ -261,15 +259,13 @@ body {
 
 .nav-btn.active:hover {
   background: #2a2557;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .logout-btn:hover {
   background: #fef2f2 !important;
   color: #dc2626 !important;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .sidebar-footer {
@@ -437,8 +433,7 @@ body {
 .history-actions .btn:hover {
   background: #f9fafb;
   border-color: #9ca3af;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .history-actions .btn.delete-btn {
@@ -450,8 +445,7 @@ body {
 .history-actions .btn.delete-btn:hover {
   background: #fef2f2;
   border-color: #dc2626;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 /* Mobile G (425px) and below - convert history buttons to icons and fix avatar */
@@ -483,8 +477,7 @@ body {
   .history-actions .btn:hover {
     background: #f9fafb;
     border-color: #9ca3af;
-      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   }
 
   .history-actions .btn.delete-btn {
@@ -496,8 +489,7 @@ body {
   .history-actions .btn.delete-btn:hover {
     background: #fef2f2;
     border-color: #dc2626;
-      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   }
 
   /* Hide text in history buttons, show only icons */
@@ -528,83 +520,68 @@ body {
 }
 
 /* Mobile M (375px) and below - compact edit profile form with icon buttons */
-@media (max-width: 375px) {
-  .avatar-large {
-    width: 50px;
-    height: 50px;
-    font-size: 16px;
-    border: 2px solid white;
-    aspect-ratio: 1;
-    flex-shrink: 0;
-  }
-
-  .profile-card {
-    padding: 16px;
-  }
-
-  .photo-section {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-  }
-
-  .form-group {
-    margin-bottom: 16px;
-  }
-
-  .input-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+@media (max-width: 376px) {
+ .input-group {
+    gap: 4px; /* Reduced gap from 6px to 4px */
   }
 
   .input-group input {
-    flex: 1;
+    min-width: 0; /* Ensure input can shrink */
+    font-size: 13px; /* Slightly smaller font for more space */
   }
 
-  /* Small edit buttons aligned to the right */
   .input-group .btn {
-    background: white !important;
-    color: #374151 !important;
-    border: 1px solid #d1d5db !important;
-    width: 60px;
-    height: 32px;
-    padding: 0;
-    justify-content: center;
-    align-items: center;
-    border-radius: 4px;
-    font-size: 12px;
-    flex-shrink: 0;
-    transition: all 0.2s ease;
+    width: 80px !important; /* Reduced from 45px to 40px */
+    font-size: 13px !important; /* Reduced from 10px to 9px */
+    height: 40px;
+    
   }
 
-  .input-group .btn:hover {
-    background: #f9fafb !important;
-    border-color: #9ca3af !important;
-      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  .profile-card {
+    padding: 12px;
+    overflow: hidden; /* Prevent content overflow */
   }
 
   .main-content {
-    padding: 12px;
+    padding: 8px;
+  }
+
+  /* Ensure form groups don't overflow */
+  .form-group {
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+}
+
+/* Added specific rules for very small screens (320px) */
+@media (max-width: 321px) {
+  .input-group {
+    gap: 4px; /* Reduced gap from 6px to 4px */
+  }
+
+  .input-group input {
+    min-width: 0; /* Ensure input can shrink */
+    font-size: 13px; /* Slightly smaller font for more space */
+  }
+
+  .input-group .btn {
+    width: 60px !important; /* Reduced from 45px to 40px */
+    font-size: 11px !important; /* Reduced from 10px to 9px */
   }
 
   .profile-card {
     padding: 12px;
+    overflow: hidden; /* Prevent content overflow */
   }
 
-  .form-group {
-    margin-bottom: 12px;
-  }
-
-  .input-group input {
-    font-size: 14px;
+  .main-content {
     padding: 8px;
   }
 
-  .password-card {
-    padding: 16px;
-    margin: 16px 0;
+  /* Ensure form groups don't overflow */
+  .form-group {
+    margin-bottom: 12px;
+    overflow: hidden;
   }
 }
 
@@ -773,8 +750,7 @@ body {
 
 .password-toggle-btn:hover {
   background: #2a2557;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .password-form {
@@ -1031,7 +1007,7 @@ body {
 }
 
 /* Tablet-specific responsive rules */
-@media (max-width: 1024px) and (min-width: 769px) {
+@media (max-width: 1023px) and (min-width: 769px) {
   .sidebar {
     width: 64px !important;
   }
@@ -1106,8 +1082,7 @@ body {
 .btn:hover {
   background: #f9fafb;
   border-color: #9ca3af;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .btn i {
@@ -1142,8 +1117,7 @@ canvas {
   background: #2a2557 !important;
   border-color: #2a2557 !important;
   transform: translateY(-1px);
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .photo-upload-btn i {
@@ -1171,90 +1145,54 @@ canvas {
   .sidebar:not(.collapsed) .new-calc-btn .btn-text {
     display: block !important;
   }
-.btn-danger{
-   background-color: rgb(201, 0, 0);
-   width: 100%;
-   color: white;
-   text-align: center;
+}
+
+.btn-danger {
+  background-color: rgb(201, 0, 0);
+  width: 100%;
+  color: white;
+  text-align: center;
   align-items: center;
-      justify-content: center;
+  justify-content: center;
 }
-.btn-danger:hover{
-     background-color: rgb(209, 0, 0);
-       box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
-
-  
+.btn-danger:hover {
+  background-color: rgb(209, 0, 0);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-.btn-primario { 
+
+.btn-primario {
   background-color: #363071 !important;
-   width: 100%;
-   color: white;
-   text-align: center;
+  width: 100%;
+  color: white;
+  text-align: center;
   align-items: center;
-      justify-content: center;
+  justify-content: center;
 }
-.btn-primario:hover{
-     btn-primario: #443d8b ;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
-  
+.btn-primario:hover {
+  background-color: #443d8b;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-.btn-foraline{ 
+
+.btn-foraline {
   background-color: #ffffff;
-   width: 100%;
-   color: rgb(0, 0, 0);
-   text-align: center;
+  width: 100%;
+  color: rgb(0, 0, 0);
+  text-align: center;
   align-items: center;
-      justify-content: center;
+  justify-content: center;
 }
-.btn-foraline:hover{
-     btn-primario: #e2e0ff ;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
-  
+.btn-foraline:hover {
+  background-color: #e2e0ff;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
+
 hr.solid {
   border-top: 3px solid #bbb;
 }
-  .sidebar:not(.collapsed) .logout-btn {
-    justify-content: flex-start;
-    padding: 12px;
-    width: 100%;
-  }
 
-  .sidebar.collapsed .logout-btn {
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
-    width: 40px;
-    height: 40px;
-    margin: 0 auto;
-  }
-
-  .sidebar:not(.collapsed) .logout-btn span {
-    display: inline;
-  }
-
-  .sidebar.collapsed .logout-btn span {
-    display: none;
-  }
-}
-
-/* Password change button stays blue */
-
-.btn-primarye {
-  background: #363071 !important;
-  color: white !important;
-  border: none !important;
-}
-
-.btn-primarye {
-  background: #2a2557 !important;
-
-}
-
-/* Delete profile button is red and large */
 .delete-profile-btn {
   background: #dc2626 !important;
   color: white !important;
@@ -1271,8 +1209,7 @@ hr.solid {
 
 .delete-profile-btn:hover {
   background: #b91c1c !important;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 /* Edit profile buttons - WHITE with proper styling */
@@ -1295,7 +1232,6 @@ hr.solid {
   background: #edf3f9;
   border-color: #9ca3af;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
 }
 
 /* Special button colors override default */
@@ -1307,8 +1243,7 @@ hr.solid {
 
 .btn.primary:hover {
   background: #2a2557;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .btn.danger {
@@ -1319,6 +1254,5 @@ hr.solid {
 
 .btn.danger:hover {
   background: #b91c1c;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }

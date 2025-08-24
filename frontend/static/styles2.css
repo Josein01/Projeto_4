@@ -1,163 +1,184 @@
- * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            background-color: white;
-        }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  background-color: white;
+}
 
-        .header {
-            background-color: white;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
+.header {
+  background-color: white;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
 
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
 
-        .logo {
-            color: #463b9e;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
+.logo {
+  color: #463b9e;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
 
-        .version-badge {
-            background-color: #efedff;
-            color: #9e9ea3;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-        }
+.version-badge {
+  background-color: #efedff;
+  color: #9e9ea3;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+}
 
-        .subtitle {
-            color: #9e9ea3;
-            font-size: 1.125rem;
-        }
+.subtitle {
+  color: #9e9ea3;
+  font-size: 1.125rem;
+}
 
-        .icon {
-            background-color: #463b9e;
-            color: white;
-            width: 3rem;
-            height: 3rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.icon {
+  background-color: #463b9e;
+  color: white;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-        .icon span {
-            font-size: 1.25rem;
-            font-weight: bold;
-        }
+.icon span {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
 
-        .main-content {
-            max-width: 64rem;
-            margin: 0 auto;
-            padding: 2rem 1.5rem;
-        }
+/* Adicionando estilos para o círculo de perfil */
+.profile-circle {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #6011a6, #463b9e);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
 
-        .title-section {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+.profile-circle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(96, 17, 166, 0.3);
+}
 
-        .title {
-            color: #000000;
-            font-size: 1.25rem;
-            font-weight: normal;
-        }
+.main-content {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
 
-        .title-divider {
-            width: 100%;
-            height: 1px;
-            background-color: #9e9ea3;
-            margin-top: 1rem;
-        }
+.title-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
 
-        .section {
-            background-color: #efedff;
-            border: 2px solid #463b9e;
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
+.title {
+  color: #000000;
+  font-size: 1.25rem;
+  font-weight: normal;
+}
 
-        .section-title {
-            color: #463b9e;
-            font-size: 1.125rem;
-            font-weight: normal;
-            margin-bottom: 1rem;
-        }
+.title-divider {
+  width: 100%;
+  height: 1px;
+  background-color: #9e9ea3;
+  margin-top: 1rem;
+}
 
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
+.section {
+  background-color: #efedff;
+  border: 2px solid #463b9e;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
 
-        .data-row:last-child {
-            margin-bottom: 0;
-        }
+.section-title {
+  color: #463b9e;
+  font-size: 1.125rem;
+  font-weight: normal;
+  margin-bottom: 1rem;
+}
 
-        .data-label, .data-value {
-            color: #000000;
-        }
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
 
-        .disclaimer {
-            border: 1px solid #9e9ea3;
-            border-radius: 0.25rem;
-            padding: 1rem;
-            margin-bottom: 2rem;
-        }
+.data-row:last-child {
+  margin-bottom: 0;
+}
 
-        .disclaimer-text {
-            color: #000000;
-            font-size: 0.875rem;
-            line-height: 1.6;
-        }
+.data-label,
+.data-value {
+  color: #000000;
+}
 
-        .button-container {
-            text-align: center;
-        }
+.disclaimer {
+  border: 1px solid #9e9ea3;
+  border-radius: 0.25rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
 
-        .new-simulation-btn {
-            background-color: #6011a6;
-            color: #ffffff;
-            padding: 0.75rem 2rem;
-            border-radius: 9999px;
-            border: none;
-            font-weight: normal;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
+.disclaimer-text {
+  color: #000000;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
 
-        .new-simulation-btn:hover {
-            background-color: #463b9e;
-        }
+.button-container {
+  text-align: center;
+}
 
-        @media (max-width: 768px) {
-            .header-left {
-                gap: 0.5rem;
-            }
-            
-            .subtitle {
-                display: none;
-            }
-            
-            .main-content {
-                padding: 1rem;
-            }
-        }
+.new-simulation-btn {
+  background-color: #6011a6;
+  color: #ffffff;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  border: none;
+  font-weight: normal;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.new-simulation-btn:hover {
+  background-color: #463b9e;
+}
+
+@media (max-width: 768px) {
+  .header-left {
+    gap: 0.5rem;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+}
