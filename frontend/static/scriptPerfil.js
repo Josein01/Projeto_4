@@ -4,26 +4,36 @@
 // =======================================================================
 
 /**
+ * Função "guardiã": Verifica se a resposta da API é um erro de autenticação.
+ * Se for um erro 401 ou 422, limpa o token e redireciona para o login.
+ * @param {Response} response - O objeto de resposta do fetch.
+ */
+function handleAuthError(response) {
+    if (response.status === 401 || response.status === 422) {
+        localStorage.removeItem('accessToken');
+        alert("Sua sessão expirou. Por favor, faça o login novamente.");
+        window.location.href = '/login';
+        return true; // Indica que um erro de autenticação ocorreu
+    }
+    return false;
+}
+
+/**
  * Função de inicialização principal.
- * É executada assim que a página HTML termina de carregar.
  */
 document.addEventListener("DOMContentLoaded", () => {
-  // Inicializa os ícones da biblioteca Lucide
   if (typeof lucide !== "undefined") {
     lucide.createIcons();
   }
   
-  // Busca todos os dados necessários da API assim que a página carrega
   loadProfileData();
   loadHistoryData();
   loadDashboardData();
-  
-  // Configura todos os eventos de clique da página
   initializeEventListeners();
 });
 
 /**
- * Busca os dados agregados para o dashboard na API e preenche os elementos.
+ * Busca os dados agregados para o dashboard na API.
  */
 async function loadDashboardData() {
   const token = localStorage.getItem('accessToken');
@@ -33,10 +43,11 @@ async function loadDashboardData() {
     const response = await fetch('/api/dashboard', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (handleAuthError(response)) return;
     const data = await response.json();
     if (!response.ok) throw new Error(data.erro || 'Falha ao buscar dados do dashboard.');
 
-    // Preenche os cards de estatísticas (assume que os IDs/classes existem no HTML)
+    // Preenche os cards de estatísticas
     const totalInvestidoEl = document.querySelector('.stats-grid .stat-card:nth-child(1) .stat-value');
     if (totalInvestidoEl) totalInvestidoEl.textContent = data.kpi_principais.total_investido;
 
@@ -49,7 +60,6 @@ async function loadDashboardData() {
         if (ultimaSimulacaoRendimentoEl) ultimaSimulacaoRendimentoEl.textContent = data.ultima_simulacao.rendimento_bruto;
     }
     
-    // Inicializa os gráficos com os dados recebidos
     initializeCharts(data);
 
   } catch (error) {
@@ -61,20 +71,16 @@ async function loadDashboardData() {
  * Inicializa os gráficos do Chart.js com os dados da API.
  */
 function initializeCharts(dashboardData) {
-    // Gráfico de Pizza: Distribuição de Investimentos
     const pieChartCanvas = document.getElementById('pieChart');
     if (pieChartCanvas && dashboardData.distribuicao_investimentos) {
         const ctxPie = pieChartCanvas.getContext('2d');
-        const tipos = dashboardData.distribuicao_investimentos.map(item => item.tipo);
-        const quantidades = dashboardData.distribuicao_investimentos.map(item => item.quantidade);
-
         new Chart(ctxPie, {
             type: 'pie',
             data: {
-                labels: tipos,
+                labels: dashboardData.distribuicao_investimentos.map(item => item.tipo),
                 datasets: [{
                     label: 'Quantidade de Simulações',
-                    data: quantidades,
+                    data: dashboardData.distribuicao_investimentos.map(item => item.quantidade),
                     backgroundColor: ['#463b9e', '#6c51f7', '#a49fef', '#c3c0f5'],
                     hoverOffset: 4
                 }]
@@ -82,69 +88,105 @@ function initializeCharts(dashboardData) {
             options: { responsive: true, maintainAspectRatio: false }
         });
     }
+    const lineChartCanvas = document.getElementById('lineChart');
+    if (lineChartCanvas && dashboardData.evolucao_investimento) {
+        const ctxLine = lineChartCanvas.getContext('2d');
+        new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: dashboardData.evolucao_investimento.map(item => item.data),
+                datasets: [
+                    {
+                        label: 'Valor Total Investido',
+                        data: dashboardData.evolucao_investimento.map(item => item.investido),
+                        borderColor: '#a49fef',
+                        backgroundColor: 'rgba(164, 159, 239, 0.2)',
+                        fill: true, tension: 0.3
+                    },
+                    {
+                        label: 'Valor Líquido Acumulado',
+                        data: dashboardData.evolucao_investimento.map(item => item.liquido),
+                        borderColor: '#463b9e',
+                        backgroundColor: 'rgba(70, 59, 158, 0.2)',
+                        fill: true, tension: 0.3
+                    }
+                ]
+            }
+        });
+    }
+    const barChartCanvas = document.getElementById('barChart');
+    if (barChartCanvas && dashboardData.comparativo_mensal) {
+        const ctxBar = barChartCanvas.getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: dashboardData.comparativo_mensal.labels,
+                datasets: [
+                    {
+                        label: 'Investido no Mês',
+                        data: dashboardData.comparativo_mensal.investido,
+                        backgroundColor: '#a49fef',
+                    },
+                    {
+                        label: 'Rendimento no Mês',
+                        data: dashboardData.comparativo_mensal.rendimento,
+                        backgroundColor: '#463b9e',
+                    }
+                ]
+            }
+        });
+    }
 }
 
 /**
- * Busca os dados do perfil do usuário na API (/api/perfil) e preenche a página.
+ * Busca os dados do perfil do usuário na API e preenche a página.
  */
 async function loadProfileData() {
   const token = localStorage.getItem('accessToken');
   if (!token) { 
-    alert("Sessão expirada. Por favor, faça o login novamente.");
     window.location.href = '/login'; 
     return; 
   }
-
   try {
-    const response = await fetch('/api/perfil', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await fetch('/api/perfil', { headers: { 'Authorization': `Bearer ${token}` } });
+    if (handleAuthError(response)) return;
     const profile = await response.json();
     if (!response.ok) throw new Error(profile.erro || 'Falha ao buscar dados do perfil.');
-
     const profileName = `${profile.primeiro_nome} ${profile.sobrenome}`;
     const profileInitials = `${profile.primeiro_nome.charAt(0)}${profile.sobrenome.charAt(0)}`;
-    
     document.querySelector('.profile-name').textContent = profileName;
     document.querySelector('.profile-email').textContent = profile.email;
     document.querySelector('.avatar span').textContent = profileInitials;
     document.querySelector('.avatar-large span').textContent = profileInitials;
-    
     document.getElementById('firstName').value = profile.primeiro_nome;
     document.getElementById('lastName').value = profile.sobrenome;
     document.getElementById('email').value = profile.email;
-
   } catch (error) {
     console.error("Erro ao carregar dados do perfil:", error);
-    alert(error.message);
   }
 }
 
 /**
- * Busca o histórico de simulações na API (/api/historico) e renderiza na tela.
+ * Busca o histórico de simulações na API e renderiza na tela.
  */
 async function loadHistoryData() {
   const token = localStorage.getItem('accessToken');
   if (!token) return;
-
   const emptyState = document.getElementById("empty-state");
   const historyContent = document.getElementById("history-content");
   const historyList = document.getElementById("history-list");
 
   try {
-    const response = await fetch('/api/historico', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await fetch('/api/historico', { headers: { 'Authorization': `Bearer ${token}` } });
+    if (handleAuthError(response)) return;
     const history = await response.json();
     if (!response.ok) throw new Error(history.erro || 'Falha ao buscar histórico.');
-    
     if (history.length === 0) {
       emptyState.style.display = "flex";
       historyContent.style.display = "none";
     } else {
       emptyState.style.display = "none";
       historyContent.style.display = "block";
-
       historyList.innerHTML = history.map(item => `
         <div class="history-item" id="history-item-${item.id_calculo}">
             <div class="history-item-content">
@@ -156,9 +198,7 @@ async function loadHistoryData() {
                 <div class="history-item-actions">
                     <button class="btn btn-outline btn-sm" onclick='handleCopyCalculation(${JSON.stringify(item)})'><i data-lucide="copy"></i> Copiar</button>
                     <button class="btn btn-outline btn-sm" onclick="handleViewResult(${item.id_calculo})"><i data-lucide="eye"></i> Ver resultados</button>
-                    <button class="btn btn-outline btn-sm" style="color: #dc2626;" onclick="handleDeleteCalculation(${item.id_calculo})">
-                        <i data-lucide="trash-2"></i>
-                    </button>
+                    <button class="btn btn-outline btn-sm" style="color: #dc2626;" onclick="handleDeleteCalculation(${item.id_calculo})"><i data-lucide="trash-2"></i></button>
                 </div>
             </div>
         </div>
@@ -173,42 +213,12 @@ async function loadHistoryData() {
   }
 }
 
-/**
- * Lida com o clique no botão de deletar um item do histórico.
- */
-async function handleDeleteCalculation(idCalculo) {
-    if (!confirm("Tem certeza que deseja apagar este item do histórico?")) {
-        return;
-    }
-    const token = localStorage.getItem('accessToken');
-    if (!token) return;
-    try {
-        const response = await fetch(`/api/historico/${idCalculo}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.erro || 'Falha ao deletar item.');
-        const itemParaRemover = document.getElementById(`history-item-${idCalculo}`);
-        if (itemParaRemover) {
-            itemParaRemover.remove();
-        }
-    } catch (error) {
-        alert(error.message);
-    }
-}
-window.handleDeleteCalculation = handleDeleteCalculation;
-
-/**
- * Busca um resultado específico do histórico e redireciona para a página de resultados.
- */
 async function handleViewResult(idCalculo) {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
     try {
-        const response = await fetch(`/api/historico/${idCalculo}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const response = await fetch(`/api/historico/${idCalculo}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (handleAuthError(response)) return;
         const result = await response.json();
         if (!response.ok) throw new Error(result.erro || 'Falha ao buscar detalhes.');
         localStorage.setItem('simulationResult', JSON.stringify(result));
@@ -219,20 +229,34 @@ async function handleViewResult(idCalculo) {
 }
 window.handleViewResult = handleViewResult;
 
-/**
- * Copia um resumo do resultado do cálculo para a área de transferência.
- */
 function handleCopyCalculation(item) {
     const textToCopy = `Resultado Simulação - EasyInvest\n------------------------------------\nTipo: ${item.tipo_investimento}\nValor Investido: ${item.valor_investido}\nPrazo: ${item.prazo_dias} dias\nTaxa: ${item.taxa_utilizada}\nResultado Líquido: ${item.resultado_liquido}`;
     navigator.clipboard.writeText(textToCopy.trim())
-        .then(() => alert("Resultado copiado para a área de transferência!"))
-        .catch(err => alert("Não foi possível copiar o resultado."));
+        .then(() => alert("Resultado copiado!"))
+        .catch(err => alert("Não foi possível copiar."));
 }
 window.handleCopyCalculation = handleCopyCalculation;
 
-/**
- * Configura todos os eventos de clique da página.
- */
+async function handleDeleteCalculation(idCalculo) {
+    if (!confirm("Tem certeza que deseja apagar este item?")) return;
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+    try {
+        const response = await fetch(`/api/historico/${idCalculo}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (handleAuthError(response)) return;
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.erro || 'Falha ao deletar.');
+        const itemParaRemover = document.getElementById(`history-item-${idCalculo}`);
+        if (itemParaRemover) itemParaRemover.remove();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+window.handleDeleteCalculation = handleDeleteCalculation;
+
 function initializeEventListeners() {
   document.getElementById("sidebar-toggle").addEventListener("click", toggleSidebar);
   document.querySelector('.new-calc-btn').addEventListener('click', () => window.location.href = '/');
@@ -242,9 +266,6 @@ function initializeEventListeners() {
   });
 }
 
-/**
- * Controla a exibição das abas (Histórico, Dashboard, Perfil).
- */
 function setActiveTab(tab) {
   document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
   document.getElementById(tab + "-tab").classList.add("active");
@@ -253,9 +274,6 @@ function setActiveTab(tab) {
 }
 window.setActiveTab = setActiveTab;
 
-/**
- * Controla o colapso da barra lateral.
- */
 function toggleSidebar() {
   const sidebar = document.getElementById("sidebar");
   const toggle = document.getElementById("sidebar-toggle");
@@ -268,9 +286,6 @@ function toggleSidebar() {
   lucide.createIcons();
 }
 
-/**
- * Habilita ou desabilita a edição de um campo do formulário de perfil.
- */
 function toggleEdit(fieldName) {
     const input = document.getElementById(fieldName);
     const button = input.nextElementSibling; 
@@ -289,9 +304,6 @@ function toggleEdit(fieldName) {
 }
 window.toggleEdit = toggleEdit;
 
-/**
- * Envia as alterações do perfil para a API.
- */
 async function saveProfileChanges() {
     const token = localStorage.getItem('accessToken');
     if (!token) { return; }
@@ -304,6 +316,7 @@ async function saveProfileChanges() {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(updatedData)
         });
+        if (handleAuthError(response)) return;
         const result = await response.json();
         if (!response.ok) throw new Error(result.erro || 'Falha ao atualizar perfil.');
         const successMessage = document.getElementById('success-message');
@@ -326,9 +339,6 @@ async function saveProfileChanges() {
     }
 }
 
-/**
- * Mostra ou esconde o formulário de alteração de senha.
- */
 function togglePasswordForm() {
     const form = document.getElementById('password-form');
     if (form.style.display === 'none') {
@@ -342,9 +352,6 @@ function togglePasswordForm() {
 }
 window.togglePasswordForm = togglePasswordForm;
 
-/**
- * Envia os dados de alteração de senha para a API.
- */
 async function savePassword() {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
@@ -366,6 +373,7 @@ async function savePassword() {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(passwordData)
         });
+        if (handleAuthError(response)) return;
         const result = await response.json();
         if (!response.ok) throw new Error(result.erro || 'Falha ao alterar a senha.');
         alert(result.mensagem);
@@ -375,3 +383,48 @@ async function savePassword() {
     }
 }
 window.savePassword = savePassword;
+
+
+async function handlePhotoUpload(event) {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+    const file = event.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('foto', file);
+    try {
+        const response = await fetch('/api/perfil/foto', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+        if (handleAuthError(response)) return;
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.erro || 'Falha no upload da foto.');
+        alert(result.mensagem);
+        document.getElementById('profile-avatar-large').src = result.photo_url;
+        document.getElementById('profile-avatar-sidebar').src = result.photo_url;
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function handleDeleteProfile() {
+    if (!confirm("Você tem certeza que deseja apagar seu perfil? Esta ação é irreversível.")) return;
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+    try {
+        const response = await fetch('/api/perfil', {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (handleAuthError(response)) return;
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.erro || 'Falha ao apagar o perfil.');
+        alert(result.mensagem);
+        localStorage.removeItem('accessToken');
+        window.location.href = '/login';
+    } catch (error) {
+        alert(error.message);
+    }
+}

@@ -1,13 +1,18 @@
-// frontend/static/script.js
+// =======================================================================
+// ARQUIVO: script.js (Página da Calculadora)
+// RESPONSABILIDADE: Controlar a lógica da página principal de simulação.
+// =======================================================================
 
-// Estado da Aplicação
+// --- Estado da Aplicação ---
 let selectedCalculation = "CDB/RDB";
 
-// Elementos do DOM
+// --- Elementos do DOM ---
 const optionButtons = document.querySelectorAll(".option-button");
 const calculateButton = document.getElementById("calculate-btn");
 
-// Função de Inicialização
+/**
+ * Função de inicialização principal.
+ */
 function init() {
   optionButtons.forEach((button) => {
     button.addEventListener("click", function () {
@@ -27,7 +32,24 @@ function init() {
   fetchMarketIndicators();
 }
 
-// Busca os indicadores de mercado da API
+/**
+ * Função "guardiã": Verifica se a resposta da API é um erro de autenticação.
+ * Se for um erro 401 ou 422 (comum para token expirado/inválido), redireciona para o login.
+ * @param {Response} response - O objeto de resposta do fetch.
+ */
+function handleAuthError(response) {
+    if (response.status === 401 || response.status === 422) {
+        localStorage.removeItem('accessToken'); // Limpa o token inválido
+        alert("Sua sessão expirou. Por favor, faça o login novamente.");
+        window.location.href = '/login';
+        return true; // Indica que um erro de autenticação ocorreu
+    }
+    return false;
+}
+
+/**
+ * Busca os indicadores de mercado da API.
+ */
 async function fetchMarketIndicators() {
   try {
     const response = await fetch('/api/indicadores');
@@ -46,20 +68,13 @@ async function fetchMarketIndicators() {
  * Função principal que realiza o cálculo.
  */
 async function performCalculation(type, value, period, cdiPercent) {
-  // =================================================================
-  // AQUI ESTÁ A CORREÇÃO QUE VOCÊ IDENTIFICOU!
-  // 1. O script primeiro tenta pegar o token de acesso no navegador.
   const token = localStorage.getItem('accessToken');
-
-  // 2. Se o token NÃO existir, ele avisa o usuário e o redireciona para a página de login.
   if (!token) {
     alert('Você precisa estar logado para realizar uma simulação.');
-    window.location.href = '/login'; // Redireciona para a tela de login
-    return; // Interrompe a função aqui mesmo.
+    window.location.href = '/login';
+    return;
   }
-  // =================================================================
-
-  // Se o token existir, o resto do código continua normalmente...
+  
   let apiUrl = '';
   let simulationData = {};
 
@@ -87,6 +102,9 @@ async function performCalculation(type, value, period, cdiPercent) {
       body: JSON.stringify(simulationData)
     });
 
+    // Chama a função "guardiã" para verificar o token
+    if (handleAuthError(response)) return;
+
     const result = await response.json();
     if (!response.ok) throw new Error(result.erro || 'Erro na simulação.');
 
@@ -98,5 +116,4 @@ async function performCalculation(type, value, period, cdiPercent) {
   }
 }
 
-// Inicializa o script
 document.addEventListener("DOMContentLoaded", init);

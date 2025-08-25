@@ -10,6 +10,7 @@ class User(db.Model):
     sobrenomeusuario = db.Column(db.String(100), nullable=False)
     emailusuario = db.Column(db.String(100), unique=True, index=True, nullable=False)
     senhausuario = db.Column(db.String(300), nullable=False)
+    fotoperfil = db.Column(db.String(255), nullable=True)
     calculos = db.relationship('Calculo', backref='autor', lazy='dynamic')
 
     def set_password(self, password):
@@ -17,6 +18,7 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.senhausuario, password)
+
 
 class Calculo(db.Model):
     __tablename__ = 'calculos'

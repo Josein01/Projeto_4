@@ -6,6 +6,11 @@ from app import db
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from . import services
 import decimal
+from sqlalchemy import func, extract
+import os
+from werkzeug.utils import secure_filename
+from flask import url_for
+from datetime import datetime
 
 # --- ROTAS DE PÁGINAS ---
 @current_app.route('/')
@@ -98,6 +103,57 @@ def delete_perfil():
         db.session.rollback()
         print(f"ERRO ao deletar perfil: {e}")
         return jsonify({"erro": "Ocorreu um erro ao apagar sua conta."}), 500
+    
+# --- NOVAS APIS PARA ADICIONAR ---
+
+@current_app.route('/api/alterar-senha', methods=['POST'])
+@jwt_required()
+def alterar_senha():
+    """
+    Permite que um usuário logado altere sua própria senha.
+    """
+    user_id = get_jwt_identity()
+    usuario = User.query.get(user_id)
+
+    dados = request.get_json()
+    senha_atual = dados.get('senha_atual')
+    nova_senha = dados.get('nova_senha')
+
+    if not senha_atual or not nova_senha:
+        return jsonify({"erro": "Senha atual e nova senha são obrigatórias."}), 400
+
+    if not usuario.check_password(senha_atual):
+        return jsonify({"erro": "A senha atual está incorreta."}), 401
+
+    usuario.set_password(nova_senha)
+    db.session.commit()
+
+    return jsonify({"mensagem": "Senha alterada com sucesso!"})
+
+# --- Lógica para o Upload da Foto ---
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@current_app.route('/api/perfil/foto', methods=['POST'])
+@jwt_required()
+def upload_foto_perfil():
+    user_id = get_jwt_identity()
+    usuario = User.query.get(user_id)
+    if 'foto' not in request.files: return jsonify({"erro": "Nenhum arquivo enviado"}), 400
+    file = request.files['foto']
+    if file.filename == '' or not allowed_file(file.filename): return jsonify({"erro": "Arquivo inválido"}), 400
+    
+    filename = secure_filename(f"user_{user_id}_{int(datetime.now().timestamp())}.{file.filename.rsplit('.', 1)[1].lower()}")
+    upload_folder = os.path.join(current_app.static_folder, 'profile_pics')
+    os.makedirs(upload_folder, exist_ok=True)
+    file.save(os.path.join(upload_folder, filename))
+    usuario.fotoperfil = filename
+    db.session.commit()
+    photo_url = url_for('static', filename=f'profile_pics/{filename}')
+    return jsonify({"mensagem": "Foto atualizada!", "photo_url": photo_url})
 
 @current_app.route('/api/historico', methods=['GET'])
 @jwt_required()
@@ -209,17 +265,70 @@ def simular_investimento_tesouro_selic():
 @current_app.route('/api/dashboard', methods=['GET'])
 @jwt_required()
 def get_dashboard_data():
+    """
+    Busca e agrega os dados de todas as simulações do usuário
+    para alimentar a tela de Dashboard, incluindo dados para gráficos.
+    """
     user_id = get_jwt_identity()
-    kpis = db.session.query(func.count(Calculo.idcalculos), func.sum(Calculo.valor), func.sum(Calculo.resultadocalculo)).filter(Calculo.usuario_idusuario == user_id).first()
-    distribuicao = db.session.query(Investimento.tipoinvestimento, func.count(Calculo.idcalculos)).join(Investimento).filter(Calculo.usuario_idusuario == user_id).group_by(Investimento.tipoinvestimento).all()
-    ultima_simulacao = db.session.query(Calculo, Investimento).join(Investimento).filter(Calculo.usuario_idusuario == user_id).order_by(Calculo.idcalculos.desc()).first()
-    dashboard_data = {
-        "kpi_principais": { "total_simulacoes": kpis[0] or 0, "total_investido": f"R$ {kpis[1]:,.2f}" if kpis[1] else "R$ 0,00", "retorno_liquido_total": f"R$ {(kpis[2] or 0) - (kpis[1] or 0):,.2f}" if kpis[2] else "R$ 0,00" },
-        "distribuicao_investimentos": [{"tipo": tipo, "quantidade": qtd} for tipo, qtd in distribuicao],
-        "ultima_simulacao": None
+    
+    # Busca todos os cálculos para processamento, ordenados por data
+    todos_calculos = db.session.query(Calculo).filter(Calculo.usuario_idusuario == user_id).order_by(Calculo.data_calculo.asc()).all()
+
+    # --- Processamento para os Gráficos ---
+    
+    # 1. Dados para "Evolução do Investimento" (gráfico de linha)
+    evolucao_data = []
+    valor_investido_acumulado = 0
+    valor_liquido_acumulado = 0
+    for calculo in todos_calculos:
+        valor_investido_acumulado += float(calculo.valor)
+        valor_liquido_acumulado += float(calculo.resultadocalculo)
+        evolucao_data.append({
+            "data": calculo.data_calculo.strftime('%d/%m/%Y'),
+            "investido": round(valor_investido_acumulado, 2),
+            "liquido": round(valor_liquido_acumulado, 2)
+        })
+
+    # 2. Dados para o "Comparativo Mensal" (gráfico de barras) - LÓGICA REAL
+    comparativo_mensal_query = db.session.query(
+        extract('year', Calculo.data_calculo).label('ano'),
+        extract('month', Calculo.data_calculo).label('mes'),
+        func.sum(Calculo.valor).label('total_investido'),
+        func.sum(Calculo.resultadocalculo - Calculo.valor).label('total_rendimento')
+    ).filter(Calculo.usuario_idusuario == user_id).group_by('ano', 'mes').order_by('ano', 'mes').all()
+
+    comparativo_mensal_data = {
+        "labels": [f"{int(mes):02d}/{int(ano)}" for ano, mes, _, _ in comparativo_mensal_query],
+        "investido": [float(total_investido) for _, _, total_investido, _ in comparativo_mensal_query],
+        "rendimento": [float(total_rendimento) for _, _, _, total_rendimento in comparativo_mensal_query]
     }
-    if ultima_simulacao:
-        calculo, investimento = ultima_simulacao
-        rendimento_bruto = calculo.resultadocalculo - calculo.valor
-        dashboard_data["ultima_simulacao"] = { "tipo_investimento": investimento.tipoinvestimento, "valor_investido": f"R$ {calculo.valor:,.2f}", "prazo": f"{calculo.prazo} dias", "taxa_utilizada": calculo.taxa, "rendimento_bruto": f"R$ {rendimento_bruto:,.2f}", "valor_liquido": f"R$ {calculo.resultadocalculo:,.2f}" }
+    
+    # --- KPIs e Distribuição (código existente) ---
+    kpis = db.session.query(func.count(Calculo.idcalculos), func.sum(Calculo.valor)).filter(Calculo.usuario_idusuario == user_id).first()
+    distribuicao = db.session.query(Investimento.tipoinvestimento, func.count(Calculo.idcalculos)).join(Investimento).filter(Calculo.usuario_idusuario == user_id).group_by(Investimento.tipoinvestimento).all()
+    
+    # Pega os dados da última simulação para os cards de detalhe
+    ultima_simulacao_dados = None
+    if todos_calculos:
+        ultima = todos_calculos[-1] # Pega o último item da lista já ordenada
+        rendimento_bruto = ultima.resultadocalculo - ultima.valor # Aproximação
+        ultima_simulacao_dados = {
+            "valor_investido": f"R$ {ultima.valor:,.2f}",
+            "prazo": f"{ultima.prazo} dias",
+            "taxa_utilizada": ultima.taxa,
+            "rendimento_bruto": f"R$ {rendimento_bruto:,.2f}",
+            "valor_liquido": f"R$ {ultima.resultadocalculo:,.2f}"
+        }
+
+    dashboard_data = {
+        "kpi_principais": {
+            "total_simulacoes": kpis[0] or 0,
+            "total_investido": f"R$ {kpis[1]:,.2f}" if kpis[1] else "R$ 0,00",
+        },
+        "distribuicao_investimentos": [{"tipo": tipo, "quantidade": qtd} for tipo, qtd in distribuicao],
+        "evolucao_investimento": evolucao_data,
+        "comparativo_mensal": comparativo_mensal_data,
+        "ultima_simulacao": ultima_simulacao_dados
+    }
+
     return jsonify(dashboard_data)
