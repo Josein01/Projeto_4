@@ -1,5 +1,3 @@
-# Backend/run.py
-
 from app import create_app #, db # Comentado
 # from app.models import User # Comentado
 

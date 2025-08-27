@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil</title>
-    <link rel="stylesheet" href="../static/styles_perfil.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles_perfil.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
@@ -26,8 +26,8 @@
                         <img id="profile-avatar-sidebar" src="" alt="Avatar">
                     </div>
                     <div class="profile-info">
-                        <p class="profile-name">João Silva</p>
-                        <p class="profile-email">joao@email.com</p>
+                        <p class="profile-name">Carregando...</p>
+                        <p class="profile-email">Carregando...</p>
                     </div>
                 </div>
 
@@ -73,7 +73,7 @@
                     </div>
                     <h3>Nenhum cálculo realizado</h3>
                     <p>Comece a fazer seus cálculos de investimento e acompanhe seus resultados aqui!</p>
-                    <button class="btn btn-primary">Faça os cálculos</button>
+                    <button class="btn btn-primary" onclick="window.location.href='/'">Faça os cálculos</button>
                 </div>
 
                 <div id="history-content" class="history-content" style="display: none;">
@@ -87,105 +87,102 @@
 
             <!-- Dashboard Tab -->
             <div id="dashboard-tab" class="tab-content">
-                <h2>Dashboard</h2>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-content">
-                            <i data-lucide="dollar-sign"></i>
-                            <div>
-                                <p class="stat-label">Valor Investido</p>
-                                <p class="stat-value">R$ 35.000</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-content">
-                            <i data-lucide="calendar"></i>
-                            <div>
-                                <p class="stat-label">Prazo</p>
-                                <p class="stat-value">180 dias</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-content">
-                            <i data-lucide="percent"></i>
-                            <div>
-                                <p class="stat-label">Taxa Utilizada</p>
-                                <p class="stat-value">115% CDI</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-content">
-                            <i data-lucide="trending-up"></i>
-                            <div>
-                                <p class="stat-label">Rendimento Bruto</p>
-                                <p class="stat-value">R$ 41.500</p>
-                            </div>
+            <h2>Dashboard</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <i data-lucide="dollar-sign"></i>
+                        <div>
+                            <p class="stat-label">Valor Investido</p>
+                            <p class="stat-value">R$ --</p>
                         </div>
                     </div>
                 </div>
-
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <h3>Evolução do Investimento</h3>
-                        <canvas id="lineChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Comparativo Mensal</h3>
-                        <canvas id="barChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Distribuição de Investimentos</h3>
-                        <canvas id="pieChart"></canvas>
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <i data-lucide="calendar"></i>
+                        <div>
+                            <p class="stat-label">Prazo</p>
+                            <p class="stat-value">-- dias</p>
+                        </div>
                     </div>
                 </div>
-
-                <div class="details-grid">
-                    <div class="detail-card">
-                        <p class="detail-label">Alíquota de IR</p>
-                        <p class="detail-value">15%</p>
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <i data-lucide="percent"></i>
+                        <div>
+                            <p class="stat-label">Taxa Utilizada</p>
+                            <p class="stat-value">--</p>
+                        </div>
                     </div>
-                    <div class="detail-card">
-                        <p class="detail-label">Valor de IR</p>
-                        <p class="detail-value">R$ 975</p>
-                    </div>
-                    <div class="detail-card">
-                        <p class="detail-label">Valor Líquido</p>
-                        <p class="detail-value">R$ 40.525</p>
-                    </div>
-                    <div class="detail-card">
-                        <p class="detail-label">Valor Líquido Título Público</p>
-                        <p class="detail-value">R$ 39.800</p>
-                    </div>
-                    <div class="detail-card">
-                        <p class="detail-label">Diferença em R$</p>
-                        <p class="detail-value positive">+R$ 725</p>
-                    </div>
-                    <div class="detail-card">
-                        <p class="detail-label">Diferença em %</p>
-                        <p class="detail-value positive">+1.82%</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <i data-lucide="trending-up"></i>
+                        <div>
+                            <p class="stat-label">Rendimento Bruto</p>
+                            <p class="stat-value">R$ --</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Evolução do Investimento</h3>
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Comparativo Mensal</h3>
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Distribuição de Investimentos</h3>
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-card">
+                    <p class="detail-label">Alíquota de IR</p>
+                    <p class="detail-value">--</p>
+                </div>
+                <div class="detail-card">
+                    <p class="detail-label">Valor de IR</p>
+                    <p class="detail-value">R$ --</p>
+                </div>
+                <div class="detail-card">
+                    <p class="detail-label">Valor Líquido</p>
+                    <p class="detail-value">R$ --</p>
+                </div>
+                <div class="detail-card">
+                    <p class="detail-label">Valor Líquido Título Público</p>
+                    <p class="detail-value">R$ --</p>
+                </div>
+                <div class="detail-card">
+                    <p class="detail-label">Diferença em R$</p>
+                    <p class="detail-value">R$ --</p>
+                </div>
+                <div class="detail-card">
+                    <p class="detail-label">Diferença em %</p>
+                    <p class="detail-value">--</p>
+                </div>
+            </div>
+        </div>
             <!-- Perfil Tab -->
             <div id="perfil-tab" class="tab-content">
                 <div class="profile-header">
                     <h2>Editar Perfil</h2>
                     <p>Gerencie suas informações pessoais e configurações da conta</p>
                 </div>
-
                 <div id="success-message" class="success-alert" style="display: none;">
                     <i data-lucide="check"></i>
                     <span></span>
                 </div>
-
                 <div class="profile-card">
                     <div class="card-header">
-                        <i data-lucide="user"></i>
+                        <i data-lucide="image"></i>
                         <h3>Foto do Perfil</h3>
                     </div>
                     <div class="photo-section">
@@ -202,67 +199,62 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="profile-card">
                     <h3>Informações Pessoais</h3>
                     <div class="form-group">
                         <label>Primeiro Nome</label>
                         <div class="input-group">
-                            <input type="text" id="firstName" value="João" disabled>
-                            <button class="btn btn-outline btn-sm" onclick="toggleEdit('firstName')">Editar</button>
+                            <input type="text" id="firstName" value="Carregando..." disabled>
+                            <button class="btn btn-outline btn-sm" onclick="toggleEdit('firstName')"><i data-lucide="edit-2"></i> Editar</button>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>Sobrenome</label>
                         <div class="input-group">
-                            <input type="text" id="lastName" value="Silva" disabled>
-                            <button class="btn btn-outline btn-sm" onclick="toggleEdit('lastName')">Editar</button>
+                            <input type="text" id="lastName" value="Carregando..." disabled>
+                            <button class="btn btn-outline btn-sm" onclick="toggleEdit('lastName')"><i data-lucide="edit-2"></i> Editar</button>
                         </div>
                     </div>
                     <div class="form-group">
                         <label>E-mail</label>
                         <div class="input-group">
-                            <input type="email" id="email" value="joao.silva@email.com" disabled>
-                            <button class="btn btn-outline btn-sm" onclick="toggleEdit('email')">Editar</button>
+                            <input type="email" id="email" value="Carregando..." disabled>
                         </div>
                     </div>
                 </div>
-
                 <div class="profile-card password-card">
                     <div class="password-header">
                         <div class="card-header">
                             <i data-lucide="lock"></i>
                             <h3>Alterar Senha</h3>
                         </div>
-                        <button class="btn btn-primarye" onclick="togglePasswordForm()">Alterar Senha</button>
+                        <button class="btn btn-primary" onclick="togglePasswordForm()">Alterar Senha</button>
                     </div>
-
-                    <div id="password-form" class="password-form" style="display: none;">
+                    <form id="password-form" class="password-form" style="display: none;">
                         <div class="form-group">
                             <label>Senha Atual</label>
-                            <input type="password" id="currentPassword">
+                            <input type="password" id="currentPassword" required>
                         </div>
                         <div class="form-group">
                             <label>Nova Senha</label>
-                            <input type="password" id="newPassword">
+                            <input type="password" id="newPassword" required>
                         </div>
                         <div class="form-group">
                             <label>Repetir Nova Senha</label>
-                            <input type="password" id="confirmPassword">
+                            <input type="password" id="confirmPassword" required>
                         </div>
                         <div class="form-actions">
-                            <button class="btn btn-primario" onclick="savePassword()">Salvar Senha</button>
-                            <button class="btn btn-foraline" onclick="togglePasswordForm()">Cancelar</button>
+                            <button type="button" class="btn btn-primary" onclick="savePassword()">Salvar Senha</button>
+                            <button type="button" class="btn btn-outline" onclick="togglePasswordForm()">Cancelar</button>
                         </div>
-                    </div>
+                    </form>
                 </div>
                 <hr class="solid"><br>
-
                 <button class="btn btn-danger btn-full" onclick="handleDeleteProfile()">Apagar Perfil</button>
             </div>
-        </div>
+            </div>
     </div>
 
-    <script src="../static/scriptPerfil.js"></script>
+    <script src="{{ url_for('static', filename='scriptPerfil.js') }}"></script>
 </body>
 </html>

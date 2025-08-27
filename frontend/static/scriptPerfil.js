@@ -13,7 +13,7 @@ function handleAuthError(response) {
         localStorage.removeItem('accessToken');
         alert("Sua sessão expirou. Por favor, faça o login novamente.");
         window.location.href = '/login';
-        return true; // Indica que um erro de autenticação ocorreu
+        return true;
     }
     return false;
 }
@@ -22,10 +22,7 @@ function handleAuthError(response) {
  * Função de inicialização principal.
  */
 document.addEventListener("DOMContentLoaded", () => {
-  if (typeof lucide !== "undefined") {
-    lucide.createIcons();
-  }
-  
+  if (typeof lucide !== "undefined") lucide.createIcons();
   loadProfileData();
   loadHistoryData();
   loadDashboardData();
@@ -35,6 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
 /**
  * Busca os dados agregados para o dashboard na API.
  */
+// Em scriptPerfil.js
+
+// Em scriptPerfil.js
+
 async function loadDashboardData() {
   const token = localStorage.getItem('accessToken');
   if (!token) return;
@@ -47,17 +48,43 @@ async function loadDashboardData() {
     const data = await response.json();
     if (!response.ok) throw new Error(data.erro || 'Falha ao buscar dados do dashboard.');
 
-    // Preenche os cards de estatísticas
     const totalInvestidoEl = document.querySelector('.stats-grid .stat-card:nth-child(1) .stat-value');
     if (totalInvestidoEl) totalInvestidoEl.textContent = data.kpi_principais.total_investido;
 
     if (data.ultima_simulacao) {
-        const ultimaSimulacaoPrazoEl = document.querySelector('.stats-grid .stat-card:nth-child(2) .stat-value');
-        const ultimaSimulacaoTaxaEl = document.querySelector('.stats-grid .stat-card:nth-child(3) .stat-value');
-        const ultimaSimulacaoRendimentoEl = document.querySelector('.stats-grid .stat-card:nth-child(4) .stat-value');
-        if (ultimaSimulacaoPrazoEl) ultimaSimulacaoPrazoEl.textContent = data.ultima_simulacao.prazo;
-        if (ultimaSimulacaoTaxaEl) ultimaSimulacaoTaxaEl.textContent = data.ultima_simulacao.taxa_utilizada;
-        if (ultimaSimulacaoRendimentoEl) ultimaSimulacaoRendimentoEl.textContent = data.ultima_simulacao.rendimento_bruto;
+        // --- CARDS SUPERIORES ---
+        const prazoEl = document.querySelector('.stats-grid .stat-card:nth-child(2) .stat-value');
+        const taxaEl = document.querySelector('.stats-grid .stat-card:nth-child(3) .stat-value');
+        const rendimentoEl = document.querySelector('.stats-grid .stat-card:nth-child(4) .stat-value');
+        if (prazoEl) prazoEl.textContent = data.ultima_simulacao.prazo;
+        if (taxaEl) taxaEl.textContent = data.ultima_simulacao.taxa_utilizada;
+        if (rendimentoEl) rendimentoEl.textContent = data.ultima_simulacao.rendimento_bruto;
+
+        // --- CARDS DE DETALHES (IR e Líquido) ---
+        const aliquotaIrEl = document.querySelector('.details-grid .detail-card:nth-child(1) .detail-value');
+        const valorIrEl = document.querySelector('.details-grid .detail-card:nth-child(2) .detail-value');
+        const valorLiquidoEl = document.querySelector('.details-grid .detail-card:nth-child(3) .detail-value');
+        if(aliquotaIrEl) aliquotaIrEl.textContent = data.ultima_simulacao.aliquota_ir || '--';
+        if(valorIrEl) valorIrEl.textContent = data.ultima_simulacao.valor_ir || 'R$ --';
+        if(valorLiquidoEl) valorLiquidoEl.textContent = data.ultima_simulacao.valor_liquido || 'R$ --';
+
+        // --- CARDS DE COMPARAÇÃO ADICIONADOS AQUI ---
+        const valorLiquidoTPEl = document.querySelector('.details-grid .detail-card:nth-child(4) .detail-value');
+        const diferencaRsEl = document.querySelector('.details-grid .detail-card:nth-child(5) .detail-value');
+        const diferencaPctEl = document.querySelector('.details-grid .detail-card:nth-child(6) .detail-value');
+
+        if(valorLiquidoTPEl) valorLiquidoTPEl.textContent = data.ultima_simulacao.valor_liquido_tp || 'R$ --';
+        if(diferencaRsEl) diferencaRsEl.textContent = data.ultima_simulacao.diferenca_rs || 'R$ --';
+        if(diferencaPctEl) diferencaPctEl.textContent = data.ultima_simulacao.diferenca_pct || '--';
+        
+        // Lógica para colorir os resultados de diferença
+        if (diferencaRsEl && diferencaPctEl && data.ultima_simulacao.diferenca_rs_raw !== undefined) {
+            const isPositive = data.ultima_simulacao.diferenca_rs_raw > 0;
+            // Adiciona ou remove a classe 'positive' com base no resultado
+            diferencaRsEl.classList.toggle('positive', isPositive);
+            diferencaPctEl.classList.toggle('positive', isPositive);
+        }
+        // --- FIM DA LÓGICA DE COMPARAÇÃO ---
     }
     
     initializeCharts(data);
@@ -66,7 +93,6 @@ async function loadDashboardData() {
     console.error("Erro ao carregar dados do dashboard:", error);
   }
 }
-
 /**
  * Inicializa os gráficos do Chart.js com os dados da API.
  */
@@ -143,26 +169,28 @@ function initializeCharts(dashboardData) {
  */
 async function loadProfileData() {
   const token = localStorage.getItem('accessToken');
-  if (!token) { 
-    window.location.href = '/login'; 
-    return; 
-  }
+  if (!token) { window.location.href = '/login'; return; }
   try {
     const response = await fetch('/api/perfil', { headers: { 'Authorization': `Bearer ${token}` } });
     if (handleAuthError(response)) return;
     const profile = await response.json();
-    if (!response.ok) throw new Error(profile.erro || 'Falha ao buscar dados do perfil.');
+    if (!response.ok) throw new Error(profile.erro || 'Falha ao buscar perfil.');
+    
     const profileName = `${profile.primeiro_nome} ${profile.sobrenome}`;
-    const profileInitials = `${profile.primeiro_nome.charAt(0)}${profile.sobrenome.charAt(0)}`;
+    const initials = `${profile.primeiro_nome.charAt(0)}${profile.sobrenome.charAt(0)}`;
+    
     document.querySelector('.profile-name').textContent = profileName;
     document.querySelector('.profile-email').textContent = profile.email;
-    document.querySelector('.avatar span').textContent = profileInitials;
-    document.querySelector('.avatar-large span').textContent = profileInitials;
+    
+    const defaultAvatar = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e0e7ff'/%3E%3Ctext x='50' y='55' font-family='Arial' font-size='40' fill='%23463b9e' text-anchor='middle' dominant-baseline='middle'%3E${initials}%3C/text%3E%3C/svg%3E`;
+    document.getElementById('profile-avatar-large').src = profile.foto_url || defaultAvatar;
+    document.getElementById('profile-avatar-sidebar').src = profile.foto_url || defaultAvatar;
+
     document.getElementById('firstName').value = profile.primeiro_nome;
     document.getElementById('lastName').value = profile.sobrenome;
     document.getElementById('email').value = profile.email;
   } catch (error) {
-    console.error("Erro ao carregar dados do perfil:", error);
+    console.error("Erro ao carregar perfil:", error);
   }
 }
 
@@ -264,6 +292,14 @@ function initializeEventListeners() {
       localStorage.removeItem('accessToken');
       window.location.href = '/login';
   });
+  const deleteProfileButton = document.querySelector('.btn-danger');
+  if (deleteProfileButton) {
+      deleteProfileButton.addEventListener('click', handleDeleteProfile);
+  }
+  const photoInput = document.getElementById('photo-input');
+  if (photoInput) {
+    photoInput.addEventListener('change', handlePhotoUpload);
+  }
 }
 
 function setActiveTab(tab) {
@@ -400,7 +436,7 @@ async function handlePhotoUpload(event) {
         });
         if (handleAuthError(response)) return;
         const result = await response.json();
-        if (!response.ok) throw new Error(result.erro || 'Falha no upload da foto.');
+        if (!response.ok) throw new Error(result.erro || 'Falha no upload.');
         alert(result.mensagem);
         document.getElementById('profile-avatar-large').src = result.photo_url;
         document.getElementById('profile-avatar-sidebar').src = result.photo_url;

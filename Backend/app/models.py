@@ -1,4 +1,3 @@
-
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -34,7 +33,6 @@ class Calculo(db.Model):
     investimento_idinvestimento = db.Column(db.Integer, db.ForeignKey('investimento.idinvestimento'))
 
     # --- RELACIONAMENTO ADICIONADO AQUI ---
-    # Cria o "atalho" .investimento para acessar o objeto Investimento relacionado
     investimento = db.relationship('Investimento', backref='calculos')
 
 

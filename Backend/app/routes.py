@@ -1,4 +1,3 @@
-# Backend/app/routes.py
 from flask import render_template, current_app, request, jsonify
 from sqlalchemy import func
 from app.models import User, Calculo, Investimento
@@ -104,7 +103,6 @@ def delete_perfil():
         print(f"ERRO ao deletar perfil: {e}")
         return jsonify({"erro": "Ocorreu um erro ao apagar sua conta."}), 500
     
-# --- NOVAS APIS PARA ADICIONAR ---
 
 @current_app.route('/api/alterar-senha', methods=['POST'])
 @jwt_required()
@@ -262,6 +260,8 @@ def simular_investimento_tesouro_selic():
         salvar_calculo_no_historico(user_id, resultado, 3)
     return jsonify(resultado)
 
+# Em routes.py
+
 @current_app.route('/api/dashboard', methods=['GET'])
 @jwt_required()
 def get_dashboard_data():
@@ -271,12 +271,9 @@ def get_dashboard_data():
     """
     user_id = get_jwt_identity()
     
-    # Busca todos os cálculos para processamento, ordenados por data
     todos_calculos = db.session.query(Calculo).filter(Calculo.usuario_idusuario == user_id).order_by(Calculo.data_calculo.asc()).all()
 
     # --- Processamento para os Gráficos ---
-    
-    # 1. Dados para "Evolução do Investimento" (gráfico de linha)
     evolucao_data = []
     valor_investido_acumulado = 0
     valor_liquido_acumulado = 0
@@ -289,7 +286,6 @@ def get_dashboard_data():
             "liquido": round(valor_liquido_acumulado, 2)
         })
 
-    # 2. Dados para o "Comparativo Mensal" (gráfico de barras) - LÓGICA REAL
     comparativo_mensal_query = db.session.query(
         extract('year', Calculo.data_calculo).label('ano'),
         extract('month', Calculo.data_calculo).label('mes'),
@@ -303,28 +299,58 @@ def get_dashboard_data():
         "rendimento": [float(total_rendimento) for _, _, _, total_rendimento in comparativo_mensal_query]
     }
     
-    # --- KPIs e Distribuição (código existente) ---
     kpis = db.session.query(func.count(Calculo.idcalculos), func.sum(Calculo.valor)).filter(Calculo.usuario_idusuario == user_id).first()
     distribuicao = db.session.query(Investimento.tipoinvestimento, func.count(Calculo.idcalculos)).join(Investimento).filter(Calculo.usuario_idusuario == user_id).group_by(Investimento.tipoinvestimento).all()
     
-    # Pega os dados da última simulação para os cards de detalhe
     ultima_simulacao_dados = None
     if todos_calculos:
-        ultima = todos_calculos[-1] # Pega o último item da lista já ordenada
-        rendimento_bruto = ultima.resultadocalculo - ultima.valor # Aproximação
+        ultima = todos_calculos[-1]
+        
+        rendimento_bruto_decimal = ultima.resultadocalculo - ultima.valor
+        aliquota_ir = services.calcular_aliquota_ir(ultima.prazo)
+        valor_ir_decimal = rendimento_bruto_decimal * decimal.Decimal(aliquota_ir)
+        
+        # --- LÓGICA DE COMPARAÇÃO ADICIONADA AQUI ---
+        valor_liquido_tp_str = "R$ --"
+        diferenca_rs_str = "R$ --"
+        diferenca_pct_str = "--"
+        diferenca_rs_raw = 0
+
+        # Roda a simulação para o Título Público para obter o valor de comparação
+        resultado_tp = services.simular_tesouro_selic(float(ultima.valor), ultima.prazo)
+        
+        if "erro" not in resultado_tp:
+            valor_liquido_tp_num = resultado_tp['_raw_values']['valor_liquido_final']
+            valor_liquido_original_num = float(ultima.resultadocalculo)
+            
+            # Calcula as diferenças
+            diferenca_rs_num = valor_liquido_original_num - valor_liquido_tp_num
+            diferenca_pct_num = (diferenca_rs_num / valor_liquido_tp_num * 100) if valor_liquido_tp_num != 0 else 0
+            
+            # Formata os valores para exibição
+            valor_liquido_tp_str = f"R$ {valor_liquido_tp_num:,.2f}"
+            diferenca_rs_str = f"{'+' if diferenca_rs_num >= 0 else ''}R$ {diferenca_rs_num:,.2f}"
+            diferenca_pct_str = f"{'+' if diferenca_pct_num >= 0 else ''}{diferenca_pct_num:,.2f}%"
+            diferenca_rs_raw = diferenca_rs_num # Envia o valor bruto para a lógica de cores do JS
+
         ultima_simulacao_dados = {
             "valor_investido": f"R$ {ultima.valor:,.2f}",
             "prazo": f"{ultima.prazo} dias",
             "taxa_utilizada": ultima.taxa,
-            "rendimento_bruto": f"R$ {rendimento_bruto:,.2f}",
-            "valor_liquido": f"R$ {ultima.resultadocalculo:,.2f}"
+            "rendimento_bruto": f"R$ {rendimento_bruto_decimal:,.2f}",
+            "valor_liquido": f"R$ {ultima.resultadocalculo:,.2f}",
+            "aliquota_ir": f"{aliquota_ir:.1%}",
+            "valor_ir": f"R$ {valor_ir_decimal:,.2f}",
+            
+            # --- NOVOS CAMPOS DE COMPARAÇÃO ---
+            "valor_liquido_tp": valor_liquido_tp_str,
+            "diferenca_rs": diferenca_rs_str,
+            "diferenca_pct": diferenca_pct_str,
+            "diferenca_rs_raw": diferenca_rs_raw
         }
 
     dashboard_data = {
-        "kpi_principais": {
-            "total_simulacoes": kpis[0] or 0,
-            "total_investido": f"R$ {kpis[1]:,.2f}" if kpis[1] else "R$ 0,00",
-        },
+        "kpi_principais": { "total_simulacoes": kpis[0] or 0, "total_investido": f"R$ {kpis[1]:,.2f}" if kpis[1] else "R$ 0,00" },
         "distribuicao_investimentos": [{"tipo": tipo, "quantidade": qtd} for tipo, qtd in distribuicao],
         "evolucao_investimento": evolucao_data,
         "comparativo_mensal": comparativo_mensal_data,

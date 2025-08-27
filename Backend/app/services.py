@@ -1,5 +1,3 @@
-# Backend/app/services.py
-
 import requests
 from datetime import datetime
 
@@ -45,38 +43,48 @@ def calcular_aliquota_ir(dias):
     elif dias <= 720: return 0.175
     else: return 0.15
 
+# Em services.py, substitua a função inteira por esta:
+
 def _get_tesouro_data():
     cache_key = 'tesouro_direto_titulos'
     if is_cache_valid(cache_key): return cache[cache_key]['data']
     try:
-        url = "https://www.tesourodireto.com.br/json/br/com/b3/tesourodireto/service/api/treasurybondsinfo.json"
+        # URL ATUALIZADA para a nova API do Tesouro Direto
+        url = "https://www.tesourodireto.com.br/proxy/tesouro-direto-web/api/v1/titulos/selecao"
         response = requests.get(url, timeout=10)
         response.raise_for_status()
-        dados_api = response.json()
-        cache[cache_key] = {'data': dados_api, 'timestamp': datetime.now()}
-        return dados_api
-    except (requests.RequestException, ValueError) as e:
+        
+        # LÓGICA ATUALIZADA para ler a nova estrutura de dados
+        dados_api = response.json()['response']
+        
+        # A estrutura agora é um dicionário, então convertemos para uma lista
+        lista_titulos = dados_api.get('listaDeTitulos', [])
+        
+        # Criamos um formato compatível com o que o resto do código espera
+        formatted_data = {
+            "response": {
+                "TrsrBdTradgList": []
+            }
+        }
+        for titulo in lista_titulos:
+            bond_data = titulo.get('titulo', {})
+            formatted_data["response"]["TrsrBdTradgList"].append({
+                "TrsrBd": {
+                    "nm": bond_data.get('nome'),
+                    "anulInvstmtRate": bond_data.get('taxaRendimento'),
+                    "invstmtStbl": "A" # Assumindo como disponível
+                }
+            })
+        
+        cache[cache_key] = {'data': formatted_data, 'timestamp': datetime.now()}
+        return formatted_data
+        
+    except (requests.RequestException, ValueError, KeyError) as e:
         print(f"AVISO: Falha ao buscar dados do Tesouro Direto: {e}.")
         print("Usando DADOS MOCKADOS para o Tesouro Direto.")
+        # O fallback com dados mockados continua sendo uma boa prática
         return {"response": {"TrsrBdTradgList": [{"TrsrBd": {"nm": "Tesouro Selic 2029 (Mock)", "anulInvstmtRate": 0.0035, "invstmtStbl": "A"}}]}}
-
-def _calcular_tesouro_selic_interno(valor_inicial, prazo_dias):
-    dados_tesouro = _get_tesouro_data()
-    if not dados_tesouro: return None
-    titulo_selic = next((t['TrsrBd'] for t in dados_tesouro['response']['TrsrBdTradgList'] if "Tesouro Selic" in t['TrsrBd']['nm'] and t['TrsrBd']['invstmtStbl'] == 'A'), None)
-    if not titulo_selic: return None
-    indicadores = get_indicadores_mercado()
-    if "erro" in indicadores: return None
-    taxa_selic_anual = indicadores['selic_valor']
-    taxa_rendimento_anual = taxa_selic_anual + titulo_selic['anulInvstmtRate']
-    taxa_rendimento_periodo = (1 + taxa_rendimento_anual)**(prazo_dias / 365) - 1
-    rendimento_bruto = valor_inicial * taxa_rendimento_periodo
-    aliquota_ir = calcular_aliquota_ir(prazo_dias)
-    valor_ir = rendimento_bruto * aliquota_ir
-    taxa_b3_anual = 0.0020
-    taxa_b3_periodo = (taxa_b3_anual / 365) * prazo_dias
-    valor_taxa_b3 = ((valor_inicial + (valor_inicial + rendimento_bruto)) / 2) * taxa_b3_periodo
-    return (valor_inicial + rendimento_bruto) - valor_ir - valor_taxa_b3
+    
 
 def simular_cdb(valor_inicial, prazo_dias, percentual_cdi):
     indicadores = get_indicadores_mercado()
