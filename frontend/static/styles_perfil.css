@@ -1256,3 +1256,11 @@ hr.solid {
   background: #b91c1c;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
+
+.avatar img,
+.avatar-large img {
+  width: 100%;          /* Faz a imagem ocupar 100% da largura do contêiner */
+  height: 100%;         /* Faz a imagem ocupar 100% da altura do contêiner */
+  object-fit: cover;    /* Esta é a propriedade chave: redimensiona a imagem para cobrir todo o espaço, cortando as bordas se necessário, mas SEM distorcer a imagem. */
+  border-radius: 50%;   /* Garante que a própria imagem também tenha as bordas arredondadas. */
+}
