@@ -616,6 +616,11 @@ def get_dashboard_data():
         description: Token de autorização ausente ou inválido.
     """
     user_id = get_jwt_identity()
+    # Adicionado para buscar o usuário e a foto
+    usuario = User.query.get(user_id)
+    if not usuario:
+        return jsonify({"erro": "Usuário não encontrado"}), 404
+
     todos_calculos = db.session.query(Calculo).filter(Calculo.usuario_idusuario == user_id).order_by(Calculo.data_calculo.asc()).all()
 
     evolucao_data = []
@@ -650,4 +655,44 @@ def get_dashboard_data():
     if todos_calculos:
         ultima = todos_calculos[-1]
         rendimento_bruto_decimal = ultima.resultadocalculo - ultima.valor
-        aliquota_ir = services.calcular_aliquo
+        
+        # --- LINHA CORRIGIDA ---
+        aliquota_ir = services.calcular_aliquota_ir(ultima.prazo)
+        
+        valor_ir_decimal = rendimento_bruto_decimal * decimal.Decimal(aliquota_ir)
+        
+        resultado_tp = services.simular_tesouro_selic(float(ultima.valor), ultima.prazo)
+        
+        if "erro" not in resultado_tp:
+            valor_liquido_tp_num = resultado_tp['_raw_values']['valor_liquido_final']
+            valor_liquido_original_num = float(ultima.resultadocalculo)
+            diferenca_rs_num = valor_liquido_original_num - valor_liquido_tp_num
+            diferenca_pct_num = (diferenca_rs_num / valor_liquido_tp_num * 100) if valor_liquido_tp_num != 0 else 0
+
+            ultima_simulacao_dados = {
+                "valor_investido": f"R$ {ultima.valor:,.2f}",
+                "prazo": f"{ultima.prazo} dias",
+                "taxa_utilizada": ultima.taxa,
+                "rendimento_bruto": f"R$ {rendimento_bruto_decimal:,.2f}",
+                "aliquota_ir": f"{aliquota_ir:.1%}",
+                "valor_ir": f"R$ {valor_ir_decimal:,.2f}",
+                "valor_liquido": f"R$ {ultima.resultadocalculo:,.2f}",
+                "valor_liquido_tp": f"R$ {valor_liquido_tp_num:,.2f}",
+                "diferenca_rs": f"{'+' if diferenca_rs_num >= 0 else ''}R$ {diferenca_rs_num:,.2f}",
+                "diferenca_pct": f"{'+' if diferenca_pct_num >= 0 else ''}{diferenca_pct_num:,.2f}%",
+                "diferenca_rs_raw": diferenca_rs_num
+            }
+
+    dashboard_data = {
+        "kpi_principais": {
+            "total_simulacoes": kpis[0] or 0,
+            "total_investido": f"R$ {kpis[1]:,.2f}" if kpis[1] else "R$ 0,00",
+            # --- FOTO ADICIONADA AQUI ---
+            "foto_url": url_for('static', filename=f'profile_pics/{usuario.fotoperfil}', _external=True) if usuario.fotoperfil else None
+        },
+        "distribuicao_investimentos": [{"tipo": tipo, "quantidade": qtd} for tipo, qtd in distribuicao],
+        "evolucao_investimento": evolucao_data,
+        "comparativo_mensal": comparativo_mensal_data,
+        "ultima_simulacao": ultima_simulacao_dados
+    }
+    return jsonify(dashboard_data)

@@ -98,12 +98,34 @@ def simular_cdb(valor_inicial, prazo_dias, percentual_cdi):
     aliquota_ir = calcular_aliquota_ir(prazo_dias)
     valor_ir = rendimento_bruto * aliquota_ir
     valor_liquido = valor_bruto - valor_ir
+
     resultado = {
         "tipo_investimento": f"CDB {percentual_cdi}% CDI",
-        "valor_investido": f"R$ {valor_inicial:,.2f}", "prazo_dias": prazo_dias, "taxa_utilizada": f"{percentual_cdi}% da CDI ({indicadores['cdi']})",
-        "rendimento_bruto": f"R$ {rendimento_bruto:,.2f}", "aliquota_ir": f"{aliquota_ir:.1%}", "valor_ir": f"R$ {valor_ir:,.2f}", "valor_liquido_final": f"R$ {valor_liquido:,.2f}"
+        "valor_investido": f"R$ {valor_inicial:,.2f}",
+        "prazo_dias": prazo_dias,
+        "taxa_utilizada": f"{percentual_cdi}% da CDI ({indicadores['cdi']})",
+        "rendimento_bruto": f"R$ {rendimento_bruto:,.2f}",
+        "aliquota_ir": f"{aliquota_ir:.1%}",
+        "valor_ir": f"R$ {valor_ir:,.2f}",
+        "valor_liquido_final": f"R$ {valor_liquido:,.2f}"
     }
     resultado['_raw_values'] = {"valor_inicial": valor_inicial, "valor_liquido_final": valor_liquido}
+
+    # =======================================================================
+    # == LÓGICA DE COMPARAÇÃO ADICIONADA AQUI ==
+    # =======================================================================
+    resultado_tp = simular_tesouro_selic(valor_inicial, prazo_dias)
+    if "erro" not in resultado_tp:
+        valor_liquido_tp_num = resultado_tp['_raw_values']['valor_liquido_final']
+        
+        diferenca_rs_num = valor_liquido - valor_liquido_tp_num
+        diferenca_pct_num = (diferenca_rs_num / valor_liquido_tp_num * 100) if valor_liquido_tp_num != 0 else 0
+        
+        # Adiciona os novos campos ao dicionário de resultado
+        resultado['comparativo_valor'] = f"R$ {valor_liquido_tp_num:,.2f}"
+        resultado['comparativo_diferenca_rs'] = f"{'+' if diferenca_rs_num >= 0 else ''}R$ {diferenca_rs_num:,.2f}"
+        resultado['comparativo_diferenca_perc'] = f"{'+' if diferenca_pct_num >= 0 else ''}{diferenca_pct_num:,.2f}%"
+    
     return resultado
 
 def simular_lci_lca(valor_inicial, prazo_dias, percentual_cdi):
