@@ -1,13 +1,29 @@
-# Regras do Backend (Python)
+# ===== BACKEND =====
 Backend/venv/
 Backend/__pycache__/
-Backend/app.db
 Backend/instance/
+Backend/*.log
+Backend/*.tmp
+Backend/*.py[cod]
+Backend/*.egg-info/
+Backend/dist/
+Backend/build/
 
-# Regras do Frontend (geral)
+# Banco de dados local
+*.sql
+
+# ===== FRONTEND =====
 frontend/node_modules/
+frontend/dist/
+frontend/build/
 
-# Arquivos de IDEs e de sistema operacional
+# ===== CONFIG / SISTEMA =====
 .vscode/
 .idea/
 *.DS_Store
+*.env
+.env
+
+# ===== GERAIS =====
+__pycache__/
+*.log
