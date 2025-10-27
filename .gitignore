@@ -27,3 +27,8 @@ frontend/build/
 # ===== GERAIS =====
 __pycache__/
 *.log
+
+# ===== Variáveis de Ambiente =====
+.env
+.env.*
+!.env.example
