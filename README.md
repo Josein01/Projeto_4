@@ -105,19 +105,39 @@ Siga os passos abaixo para configurar e executar o projeto em seu ambiente local
 
 ## ▶️ Como Executar a Aplicação
 
-1.  Navegue até a pasta do backend no terminal:
+1. **Navegue até a pasta do backend no terminal:**
     ```bash
     cd Backend
     ```
-2.  Ative o ambiente virtual (se ainda não estiver ativo):
+
+2. **Crie e configure o ambiente virtual (apenas na primeira vez):**
+    ```bash
+    # Criar o ambiente virtual
+    python -m venv venv
+
+    # Autorizar execução de scripts (necessário apenas uma vez no PowerShell)
+    Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+    ```
+
+3. **Ative o ambiente virtual:**
     ```bash
     .\venv\Scripts\activate
     ```
-3.  Inicie o servidor Flask:
+
+4. **(Opcional)** Desative o ambiente virtual quando terminar:
+    ```bash
+    deactivate
+    ```
+
+5. **Inicie o servidor Flask:**
     ```bash
     python run.py
     ```
-4.  Abra seu navegador e acesse: `http://127.0.0.1:5000`
+
+6. **Acesse a aplicação no navegador:**
+    ```
+    http://127.0.0.1:5000
+    ```
 
 ## 🌐 Endpoints da API
 
