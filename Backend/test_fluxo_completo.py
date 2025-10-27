@@ -1,4 +1,4 @@
-import time # (O import já estava lá, mas só para garantir)
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -12,7 +12,8 @@ chrome_options.binary_location = "/usr/bin/chromium-browser"
 chrome_options.add_experimental_option("detach", True) 
 service = Service(executable_path="/usr/bin/chromedriver") 
 driver = webdriver.Chrome(service=service, options=chrome_options)
-driver.implicitly_wait(5) 
+# Aumentamos o wait implícito para 10s para dar mais folga
+driver.implicitly_wait(10) 
 
 BASE_URL = "http://127.0.0.1:5000"
 
@@ -59,35 +60,35 @@ try:
     # ----------------------------------------------------
     print("Etapa 1: Registro...")
     driver.get(BASE_URL + "/login") 
-    time.sleep(1) # PAUSA 1s
+    time.sleep(1.5) # PAUSA 1.5s
     driver.find_element(By.ID, "openModalBtn").click()
 
     signup_link = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "signupBtn")))
-    time.sleep(1) # PAUSA 1s
+    time.sleep(1.5) # PAUSA 1.5s
     signup_link.click()
 
     print("Preenchendo formulário de cadastro...")
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "signupForm")))
     driver.find_element(By.ID, "firstName").send_keys("Usuario")
-    time.sleep(0.5) # PAUSA 0.5s
+    time.sleep(1.5) # PAUSA 1.5s
     driver.find_element(By.ID, "lastName").send_keys("Teste")
-    time.sleep(0.5) # PAUSA 0.5s
+    time.sleep(1.5) # PAUSA 1.5s
     driver.find_element(By.ID, "signupEmail").send_keys(UNIQUE_EMAIL)
-    time.sleep(0.5) # PAUSA 0.5s
+    time.sleep(1.5) # PAUSA 1.5s
     driver.find_element(By.ID, "signupPassword").send_keys(USER_PASS)
-    time.sleep(0.5) # PAUSA 0.5s
+    time.sleep(1.5) # PAUSA 1.5s
     driver.find_element(By.ID, "confirmPassword").send_keys(USER_PASS)
-    time.sleep(1) # PAUSA 1s
+    time.sleep(1.5) # PAUSA 1.5s
     
     signup_form = driver.find_element(By.ID, "signupForm")
     signup_form.find_element(By.TAG_NAME, "button").click()
 
     print("Aguardando alerta de sucesso no cadastro...")
     alert = WebDriverWait(driver, 10).until(EC.alert_is_present())
-    time.sleep(1) # PAUSA 1s (para o alerta ficar visível)
+    time.sleep(1.5) # PAUSA 1.5s (para o alerta ficar visível)
     alert.accept()
     print("Alerta aceito.")
-    time.sleep(1) # PAUSA 1s
+    time.sleep(1.5) # PAUSA 1.5s
     
     print("Registro concluído. Aguardando formulário de login...")
 
@@ -97,9 +98,9 @@ try:
     print("Etapa 2: Login...")
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "loginForm")))
     driver.find_element(By.ID, "email").send_keys(UNIQUE_EMAIL)
-    time.sleep(0.5) # PAUSA 0.5s
+    time.sleep(1.5) # PAUSA 1.5s
     driver.find_element(By.ID, "password").send_keys(USER_PASS)
-    time.sleep(1) # PAUSA 1s
+    time.sleep(1.5) # PAUSA 1.5s
     
     login_form = driver.find_element(By.ID, "loginForm")
     login_button = login_form.find_element(By.CSS_SELECTOR, "button[type='submit']")
@@ -111,7 +112,7 @@ try:
     # ----------------------------------------------------
     
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "calculate-btn")))
-    time.sleep(1) # PAUSA 1s (para ver a página da calculadora)
+    time.sleep(1.5) # PAUSA 1.5s (para ver a página da calculadora)
     
     for scenario in scenarios:
         print(f"\n--- Iniciando Cenário: {scenario['name']} ---")
@@ -119,21 +120,21 @@ try:
 
         driver.find_element(By.XPATH, scenario["button_selector"]).click()
         print(f"Selecionado tipo: {scenario['name']}")
-        time.sleep(1) # PAUSA 1s
+        time.sleep(1.5) # PAUSA 1.5s
 
         for field_id, value in scenario["data"].items():
             element = driver.find_element(By.ID, field_id)
             element.clear()
-            time.sleep(0.5) # PAUSA 0.5s
+            time.sleep(1.5) # PAUSA 1.5s
             element.send_keys(value)
             print(f"Preenchido {field_id} com {value}")
-            time.sleep(0.5) # PAUSA 0.5s
+            time.sleep(1.5) # PAUSA 1.5s
         
-        time.sleep(1) # PAUSA 1s (antes de clicar em calcular)
+        time.sleep(1.5) # PAUSA 1.5s (antes de clicar em calcular)
         driver.find_element(By.ID, "calculate-btn").click()
 
         WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "valor-liquido")))
-        time.sleep(2) # PAUSA 2s (para ver bem a página de resultados)
+        time.sleep(1.5) # PAUSA 1.5s (para ver bem a página de resultados)
 
         investido = driver.find_element(By.ID, "valor-investido").text
         liquido = driver.find_element(By.ID, "valor-liquido").text
@@ -145,9 +146,41 @@ try:
         
         driver.find_element(By.CLASS_NAME, "new-simulation-btn").click()
         print("Retornando para a calculadora...")
-        time.sleep(2) # PAUSA 2s (para ver a volta)
+        time.sleep(1.5) # PAUSA 1.5s (para ver a volta)
 
-    print("\n--- TODOS OS CENÁRIOS CONCLUÍDOS ---")
+    print("\n--- SIMULAÇÕES CONCLUÍDAS ---")
+
+    # ----------------------------------------------------
+    # ETAPA 4: NAVEGAÇÃO PERFIL E DASHBOARD
+    # ----------------------------------------------------
+    print("\nEtapa 4: Verificando Perfil e Dashboard...")
+    
+    # Espera estar de volta na página da calculadora antes de prosseguir
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "calculate-btn")))
+    print("Na página da calculadora, clicando no ícone de perfil...")
+    
+    # Clica no ícone de Perfil (do index.html)
+    profile_link = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "profile-link")))
+    profile_link.click()
+    time.sleep(1.5) # PAUSA 1.5s
+    
+    # Clica no botão Dashboard (do Perfil.html)
+    print("Na página de perfil, clicando em 'Dashboard'...")
+    # Usamos o seletor de atributo que é único para o botão do dashboard
+    dashboard_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[@data-tab='dashboard']")))
+    dashboard_btn.click()
+    time.sleep(1.5) # PAUSA 1.5s
+
+    # Aguarda o conteúdo do dashboard (o gráfico de linha) ficar visível
+    WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "dashboard-tab")))
+    WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "lineChart")))
+    print("SUCESSO: Dashboard carregado e visível.")
+    
+    # Espera final para visualização
+    print("Aguardando 3s para visualização final...")
+    time.sleep(3) 
+
+    print("\n--- TESTE DE FLUXO COMPLETO CONCLUÍDO ---")
 
 except Exception as e:
     print(f"\n--- O TESTE FALHOU ---")
