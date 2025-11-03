@@ -22,12 +22,10 @@ timestamp = int(time.time())
 UNIQUE_EMAIL = f"teste_selenium_{timestamp}@easy.com"
 USER_PASS = "SenhaForte@123"
 
-# --- [NOVO] Credenciais de Atualização ---
-# --- [MODIFICAÇÃO] Nomes encurtados para caber no banco de dados ---
+# --- Credenciais de Atualização ---
 NEW_FIRST_NAME = "NovoNome"
 NEW_LAST_NAME = "NovoSobreNome"
 NEW_PASS = "NovaSenha@456"
-# --- [FIM NOVO] ---
 
 # --- Cenários de Teste ---
 scenarios = [
@@ -63,16 +61,67 @@ print(f"Iniciando teste E2E com o usuário: {UNIQUE_EMAIL}")
 
 try:
     # ----------------------------------------------------
-    # ETAPA 1: REGISTRO DE NOVO USUÁRIO
+    # ETAPA 1: [CORRIGIDO] TESTE DE FALHA DE LOGIN INICIAL
     # ----------------------------------------------------
-    print("Etapa 1: Registro...")
+    print("Etapa 1: Testando falha de login com credenciais aleatórias...")
     driver.get(BASE_URL + "/login") 
     time.sleep(1.5) # PAUSA 1.5s
-    driver.find_element(By.ID, "openModalBtn").click()
 
+    # --- [CORREÇÃO] Clicar em "Entrar" para abrir o modal ---
+    print("Clicando no botão 'Entrar' para abrir o modal...")
+    enter_btn = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "openModalBtn"))
+    )
+    enter_btn.click()
+
+    # --- [CORREÇÃO] Esperar o formulário de login ficar visível ---
+    WebDriverWait(driver, 10).until(
+        EC.visibility_of_element_located((By.ID, "loginForm"))
+    )
+    print("Modal de login aberto.")
+    # --- [FIM DA CORREÇÃO] ---
+    
+    # 1. Definir credenciais falsas
+    FAKE_EMAIL_INICIAL = f"nao_existe_{timestamp}@easy.com"
+    FAKE_PASS_INICIAL = "senhaerrada123"
+    print(f"Usando e-mail falso: {FAKE_EMAIL_INICIAL}")
+
+    # 2. Preencher o formulário
+    driver.find_element(By.ID, "email").send_keys(FAKE_EMAIL_INICIAL)
+    time.sleep(1) # Pausa
+    driver.find_element(By.ID, "password").send_keys(FAKE_PASS_INICIAL)
+    time.sleep(1) # Pausa
+    print("Formulário preenchido com e-mail FALSO.")
+    
+    # 3. Clicar em Login
+    login_form = driver.find_element(By.ID, "loginForm")
+    login_button = login_form.find_element(By.CSS_SELECTOR, "button[type='submit']")
+    login_button.click()
+
+    # 4. Esperar pelo alerta de ERRO
+    print("Aguardando alerta de 'credenciais inválidas'...")
+    alert = WebDriverWait(driver, 10).until(EC.alert_is_present())
+    alert_text = alert.text
+    
+    # --- [MODIFICAÇÃO] Pausa para visualizar o alerta ---
+    print(f"Alerta visível. Pausando 3s... (Msg: {alert_text})")
+    time.sleep(3)
+    # --- [FIM DA MODIFICAÇÃO] ---
+    
+    alert.accept()
+    print("Alerta de falha aceito.")
+    print("SUCESSO: Falha no login inicial confirmada.")
+
+    # ----------------------------------------------------
+    # ETAPA 2: [CORRIGIDO] REGISTRO DE NOVO USUÁRIO
+    # ----------------------------------------------------
+    print("\nEtapa 2: Registro...")
+    
+    # --- [CORREÇÃO] O modal já está aberto. Clicamos direto no link de "Criar Conta" ---
     signup_link = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "signupBtn")))
-    time.sleep(1.5) # PAUSA 1.5s
+    print("Modal já aberto, clicando em 'Não possui uma conta? Vamos criar'...")
     signup_link.click()
+    # --- [FIM DA CORREÇÃO] ---
 
     print("Preenchendo formulário de cadastro...")
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "signupForm")))
@@ -100,13 +149,20 @@ try:
     print("Registro concluído. Aguardando formulário de login...")
 
     # ----------------------------------------------------
-    # ETAPA 2: LOGIN
+    # ETAPA 3: LOGIN
     # ----------------------------------------------------
-    print("Etapa 2: Login...")
+    print("\nEtapa 3: Login...")
+    # O modal de login já está visível após o cadastro
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "loginForm")))
-    driver.find_element(By.ID, "email").send_keys(UNIQUE_EMAIL)
+    
+    email_field_etapa3 = driver.find_element(By.ID, "email")
+    email_field_etapa3.clear()
+    email_field_etapa3.send_keys(UNIQUE_EMAIL)
     time.sleep(1.5) # PAUSA 1.5s
-    driver.find_element(By.ID, "password").send_keys(USER_PASS)
+    
+    pass_field_etapa3 = driver.find_element(By.ID, "password")
+    pass_field_etapa3.clear()
+    pass_field_etapa3.send_keys(USER_PASS)
     time.sleep(1.5) # PAUSA 1.5s
     
     login_form = driver.find_element(By.ID, "loginForm")
@@ -115,7 +171,7 @@ try:
     print("Login efetuado.")
 
     # ----------------------------------------------------
-    # ETAPA 3: LOOP DE TESTES DE CÁLCULO
+    # ETAPA 4: LOOP DE TESTES DE CÁLCULO
     # ----------------------------------------------------
     
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "calculate-btn")))
@@ -142,7 +198,6 @@ try:
 
         WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "valor-liquido")))
         
-        # --- [MODIFICAÇÃO] Pausas personalizadas por cenário ---
         if scenario['name'] == "CDB/RDB":
             print("Pausando 10s para ver resultados (CDB/RDB)...")
             time.sleep(10)
@@ -154,7 +209,6 @@ try:
             time.sleep(3)
         else:
             time.sleep(1.5) # Pausa padrão
-        # --- [FIM DA MODIFICAÇÃO] ---
 
         investido = driver.find_element(By.ID, "valor-investido").text
         liquido = driver.find_element(By.ID, "valor-liquido").text
@@ -171,53 +225,42 @@ try:
     print("\n--- SIMULAÇÕES CONCLUÍDAS ---")
 
     # ----------------------------------------------------
-    # ETAPA 4: NAVEGAÇÃO PERFIL E DASHBOARD
+    # ETAPA 5: NAVEGAÇÃO PERFIL E DASHBOARD
     # ----------------------------------------------------
-    print("\nEtapa 4: Verificando Perfil e Dashboard...")
+    print("\nEtapa 5: Verificando Perfil e Dashboard...")
     
-    # Espera estar de volta na página da calculadora antes de prosseguir
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "calculate-btn")))
     print("Na página da calculadora, clicando no ícone de perfil...")
     
-    # Clica no ícone de Perfil (do index.html)
     profile_link = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "profile-link")))
     profile_link.click()
     time.sleep(1.5) # PAUSA 1.5s
     
-    # Clica no botão Dashboard (do Perfil.html)
     print("Na página de perfil, clicando em 'Dashboard'...")
-    # Usamos o seletor de atributo que é único para o botão do dashboard
     dashboard_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[@data-tab='dashboard']")))
     dashboard_btn.click()
     time.sleep(1.5) # PAUSA 1.5s
 
-    # Aguarda o conteúdo do dashboard (o gráfico de linha) ficar visível
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "dashboard-tab")))
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "lineChart")))
     print("SUCESSO: Dashboard carregado e visível.")
     
-    # Espera final para visualização
     print("Aguardando 3s para visualização final...")
     time.sleep(3) 
 
     # ----------------------------------------------------
-    # ETAPA 5: NOVO CÁLCULO (A PARTIR DO PERFIL)
+    # ETAPA 6: NOVO CÁLCULO (A PARTIR DO PERFIL)
     # ----------------------------------------------------
-    print("\nEtapa 5: Novo Cálculo a partir do Perfil...")
+    print("\nEtapa 6: Novo Cálculo a partir do Perfil...")
     
-    # --- [MODIFICAÇÃO] Corrigindo o fluxo de "Novo Cálculo" ---
-    # O scriptPerfil.js mostra que o botão .new-calc-btn agora redireciona para a home
     print("Clicando em 'Novo Cálculo' na sidebar (que redireciona para a home)...")
     new_calc_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "new-calc-btn")))
     new_calc_button.click()
 
-    # 2. Esperar ser redirecionado para a página da calculadora
-    # Fazemos isso esperando o botão "calculate-btn" ficar visível
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "calculate-btn")))
     print("Redirecionado para a página da calculadora com sucesso.")
     time.sleep(1.5) # Pausa para ver a página
 
-    # 3. Executar um novo cenário (LCI/LCA com valores diferentes)
     scenario_etapa_5 = {
         "name": "LCI/LCA (Teste 2)",
         "button_selector": "//button[@data-option='LCI/LCA']",
@@ -244,7 +287,6 @@ try:
     time.sleep(1.5) # PAUSA 1.5s (antes de clicar em calcular)
     driver.find_element(By.ID, "calculate-btn").click()
 
-    # 4. Verificar resultados
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "valor-liquido")))
     time.sleep(1.5) # PAUSA 1.5s (para ver bem a página de resultados)
 
@@ -255,138 +297,105 @@ try:
         print(f"FALHA (Novo Cálculo): Página de resultados carregada, mas valores vazios.")
 
     # ----------------------------------------------------
-    # ETAPA 6: VERIFICAÇÃO FINAL DO PERFIL (PÓS-NOVOS CÁLCULOS)
+    # ETAPA 7: VERIFICAÇÃO FINAL DO PERFIL (PÓS-NOVOS CÁLCULOS)
     # ----------------------------------------------------
-    print("\nEtapa 6: Verificando Histórico e Dashboard novamente...")
+    print("\nEtapa 7: Verificando Histórico e Dashboard novamente...")
 
-    # 1. Voltar para a página da calculadora (a partir da pág. de Resultados)
     driver.find_element(By.CLASS_NAME, "new-simulation-btn").click()
     print("Retornando para a calculadora...")
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "calculate-btn")))
     
-    # 2. Clicar no ícone de Perfil (do index.html)
     print("Na página da calculadora, clicando no ícone de perfil...")
     profile_link = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "profile-link")))
     profile_link.click()
 
-    # 3. Esperar a página de perfil carregar e clicar em 'Histórico'
-    # (Embora seja a aba padrão, clicamos para garantir a ação)
     print("Na página de perfil, clicando em 'Histórico'...")
     historico_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[@data-tab='historico']")))
     historico_btn.click()
     
-    # 4. Esperar o conteúdo do histórico (NÃO o 'empty-state')
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "history-content")))
     print("SUCESSO: Conteúdo do histórico carregado (com os novos cálculos).")
     print("Aguardando 3s para visualização do histórico...")
     time.sleep(3)
 
-    # 5. Clicar no botão Dashboard (do Perfil.html)
     print("Na página de perfil, clicando em 'Dashboard' novamente...")
     dashboard_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[@data-tab='dashboard']")))
     dashboard_btn.click()
 
-    # 6. Aguarda o conteúdo do dashboard (o gráfico de linha) ficar visível
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "lineChart")))
     print("SUCESSO: Dashboard recarregado e visível.")
     
-    # 7. Espera final
-    # --- [MODIFICAÇÃO] Pausa aumentada ---
     print("Aguardando 7s para visualização final do dashboard (ajustado)...")
     time.sleep(7)
-    # --- [FIM DA MODIFICAÇÃO] ---
 
     # ----------------------------------------------------
-    # ETAPA 7: NAVEGAR PARA EDITAR PERFIL
+    # ETAPA 8: NAVEGAR PARA EDITAR PERFIL
     # ----------------------------------------------------
-    print("\nEtapa 7: Navegando para 'Editar Perfil'...")
+    print("\nEtapa 8: Navegando para 'Editar Perfil'...")
 
-    # 1. Clicar no botão "Editar Perfil" (data-tab='perfil')
-    # Já estamos na página de perfil, apenas trocamos de aba
     perfil_tab_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[@data-tab='perfil']")))
     perfil_tab_btn.click()
 
-    # 2. Aguardar o conteúdo da aba de perfil ficar visível
-    # Vamos esperar pelo header "Editar Perfil" (h2)
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "perfil-tab")))
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.XPATH, "//h2[text()='Editar Perfil']")))
     print("SUCESSO: Aba 'Editar Perfil' carregada.")
 
-    # Pausa para visualização
     print("Aguardando 2s para visualização da aba de perfil...")
     time.sleep(2)
 
     # ----------------------------------------------------
-    # ETAPA 8: EDITAR PERFIL (NOME E SENHA)
+    # ETAPA 9: EDITAR PERFIL (NOME E SENHA)
     # ----------------------------------------------------
-    print("\nEtapa 8: Editando Nome, Sobrenome e Senha...")
+    print("\nEtapa 9: Editando Nome, Sobrenome e Senha...")
     
-    # --- Alterar Nome e Sobrenome ---
     print("Alterando nome e sobrenome...")
     
-    # 1. Clicar em "Editar" Nome
     edit_first_btn = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, "//input[@id='firstName']/following-sibling::button"))
     )
     edit_first_btn.click()
     time.sleep(0.5) # Pausa curta
 
-    # 2. Clicar em "Editar" Sobrenome
     edit_last_btn = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, "//input[@id='lastName']/following-sibling::button"))
     )
     edit_last_btn.click()
     time.sleep(0.5) # Pausa curta
 
-    # 3. Preencher novos valores
     first_name_input = driver.find_element(By.ID, "firstName")
     first_name_input.clear()
     first_name_input.send_keys(NEW_FIRST_NAME)
     print(f"Nome preenchido com: {NEW_FIRST_NAME}")
-    # --- [MODIFICAÇÃO] Pausa aumentada ---
     time.sleep(2.5) # Pausa (ajustada para 2.5s)
-    # --- [FIM DA MODIFICAÇÃO] ---
 
     last_name_input = driver.find_element(By.ID, "lastName")
     last_name_input.clear()
     last_name_input.send_keys(NEW_LAST_NAME)
     print(f"Sobrenome preenchido com: {NEW_LAST_NAME}")
-    # --- [MODIFICAÇÃO] Pausa aumentada ---
     time.sleep(2.5) # Pausa (ajustada para 2.5s)
-    # --- [FIM DA MODIFICAÇÃO] ---
 
-    # 4. Clicar em "Salvar" (pode ser qualquer um dos botões, usamos o do nome)
-    # O botão de "Editar" agora é o de "Salvar"
     edit_first_btn.click()
     
-    # 5. Esperar pela mensagem de sucesso (conforme scriptPerfil.js)
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.ID, "success-message"))
     )
     print("SUCESSO: Mensagem de 'perfil atualizado' exibida.")
-    # --- [MODIFICAÇÃO] Pausa aumentada ---
-    # A mensagem desaparece em 3s (via JS), pausamos por 5s (ajustado).
     print("Aguardando 5s para visualizar a mensagem de sucesso...")
     time.sleep(5) 
-    # --- [FIM DA MODIFICAÇÃO] ---
 
-    # --- Alterar Senha ---
     print("Alterando a senha...")
     
-    # 1. Clicar em "Alterar Senha" para abrir o formulário
     toggle_pass_btn = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Alterar Senha']"))
     )
     toggle_pass_btn.click()
 
-    # 2. Esperar formulário ficar visível
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.ID, "password-form"))
     )
     print("Formulário de alteração de senha visível.")
     time.sleep(1) # Pausa
 
-    # 3. Preencher senhas
     driver.find_element(By.ID, "currentPassword").send_keys(USER_PASS)
     time.sleep(1) # Pausa
     driver.find_element(By.ID, "newPassword").send_keys(NEW_PASS)
@@ -395,98 +404,152 @@ try:
     time.sleep(1) # Pausa
     print("Campos de senha preenchidos.")
 
-    # 4. Clicar em "Salvar Senha"
     save_pass_btn = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, "//button[@onclick='savePassword()']"))
     )
     save_pass_btn.click()
 
-    # 5. Esperar pelo alerta de sucesso (conforme scriptPerfil.js)
     print("Aguardando alerta de sucesso na alteração de senha...")
     alert = WebDriverWait(driver, 10).until(EC.alert_is_present())
     alert_text = alert.text
+    
+    # --- [MODIFICAÇÃO] Adicionando pausa de 3s no alerta ---
+    print(f"Alerta visível. Pausando 3s... (Msg: {alert_text})")
+    time.sleep(3)
+    # --- [FIM DA MODIFICAÇÃO] ---
+
     alert.accept()
     print(f"Alerta aceito com mensagem: {alert_text}")
 
-    # 6. Esperar o formulário de senha desaparecer
     WebDriverWait(driver, 10).until(
         EC.invisibility_of_element_located((By.ID, "password-form"))
     )
     print("SUCESSO: Senha alterada e formulário oculto.")
-    # --- [MODIFICAÇÃO] Pausa aumentada ---
-    time.sleep(3) # Era 2s
-    # --- [FIM DA MODIFICAÇÃO] ---
+    print("Aguardando 5s para visualização...")
+    time.sleep(5) 
 
     # ----------------------------------------------------
-    # ETAPA 9: LOGOUT
+    # ETAPA 10: LOGOUT
     # ----------------------------------------------------
-    print("\nEtapa 9: Efetuando Logout...")
+    print("\nEtapa 10: Efetuando Logout...")
     
-    # 1. Clicar no botão de Logout (conforme scriptPerfil.js)
     logout_btn = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.CLASS_NAME, "logout-btn"))
     )
     logout_btn.click()
 
-    # 2. Esperar ser redirecionado para a página de login
-    # --- [MODIFICAÇÃO] Trocando espera de Elemento por espera de URL ---
-    # Isso é mais estável após um redirecionamento, evitando o erro 'Message: '
     print("Aguardando redirecionamento para a página de login...")
     WebDriverWait(driver, 10).until(
         EC.url_to_be(BASE_URL + "/login")
     )
     print("SUCESSO: Logout efetuado, URL do login confirmada.")
     
-    # 3. [NOVO] Adicionamos uma verificação extra para garantir que o formulário está visível
-    # antes de prosseguir para a Etapa 10, garantindo que a página carregou.
+    # --- [CORREÇÃO] Esperar pelo botão "Entrar" (visível) em vez do "loginForm" (oculto) ---
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "openModalBtn"))
+    )
+    print("Página de login carregada (botão 'Entrar' visível).")
+    # --- [FIM DA CORREÇÃO] ---
+    
+    # --- [MODIFICAÇÃO] Aumentando pausa de visualização ---
+    print("Aguardando 7s para visualização...")
+    time.sleep(7) 
+    # --- [FIM DA MODIFICAÇÃO] ---
+
+    # ----------------------------------------------------
+    # ETAPA 11: [CORRIGIDO] TESTE DE FALHA DE LOGIN
+    # ----------------------------------------------------
+    print("\nEtapa 11: Testando falha de login com e-mail incorreto...")
+    
+    # --- [CORREÇÃO] A página foi recarregada, precisamos reabrir o modal ---
+    print("Clicando no botão 'Entrar' para abrir o modal...")
+    enter_btn_etapa11 = WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.ID, "openModalBtn"))
+    )
+    enter_btn_etapa11.click()
+
     WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.ID, "loginForm"))
     )
-    print("Formulário de login visível.")
-    # --- [FIM DA MODIFICAÇÃO] ---
-    # --- [MODIFICAÇÃO] Pausa aumentada ---
-    time.sleep(3) # Era 2s
-    # --- [FIM DA MODIFICAÇÃO] ---
+    print("Modal de login aberto.")
+    # --- [FIM DA CORREÇÃO] ---
+    
+    FAKE_EMAIL = f"teste_selenium_{timestamp}_fake@easy.com"
+    print(f"Usando e-mail falso: {FAKE_EMAIL}")
 
-    # ----------------------------------------------------
-    # ETAPA 10: LOGIN COM NOVAS CREDENCIAIS E VERIFICAÇÃO
-    # ----------------------------------------------------
-    print("\nEtapa 10: Testando Login com novas credenciais...")
-
-    # 1. Preencher e-mail (o mesmo) e a NOVA senha
-    driver.find_element(By.ID, "email").send_keys(UNIQUE_EMAIL)
+    driver.find_element(By.ID, "email").send_keys(FAKE_EMAIL)
     time.sleep(1) # Pausa
     driver.find_element(By.ID, "password").send_keys(NEW_PASS)
     time.sleep(1) # Pausa
-    print("Formulário de login preenchido com a NOVA senha.")
+    print("Formulário preenchido com e-mail FALSO.")
 
-    # 2. Clicar em Login
     login_form = driver.find_element(By.ID, "loginForm")
     login_button = login_form.find_element(By.CSS_SELECTOR, "button[type='submit']")
     login_button.click()
 
-    # 3. Esperar carregar a página da calculadora (confirma o login)
-    WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.ID, "calculate-btn"))
-    )
-    print("SUCESSO: Login com a nova senha efetuado.")
-    time.sleep(1.5)
+    print("Aguardando alerta de falha no login...")
+    alert = WebDriverWait(driver, 10).until(EC.alert_is_present())
+    alert_text = alert.text
+    alert.accept()
+    print(f"Alerta de falha aceito com mensagem: {alert_text}")
+    print("SUCESSO: Falha no login com dados incorretos confirmada.")
+    time.sleep(3) # Pausa para visualização
 
-    # 4. VERIFICAÇÃO FINAL: Checar se o nome foi alterado
-    print("Verificação final: Checando se o nome foi alterado no perfil...")
+    # ----------------------------------------------------
+    # ETAPA 12: LOGIN COM NOVAS CREDENCIAIS E VERIFICAÇÃO FINAL
+    # ----------------------------------------------------
+    print("\nEtapa 12: Testando Login com credenciais CORRETAS...")
+
+    # O modal já está aberto da etapa anterior
+    email_field = driver.find_element(By.ID, "email")
+    email_field.clear()
+    email_field.send_keys(UNIQUE_EMAIL) # O e-mail original/correto
+    time.sleep(1) # Pausa
     
-    # 4a. Clicar no ícone de Perfil
+    pass_field = driver.find_element(By.ID, "password")
+    pass_field.clear()
+    pass_field.send_keys(NEW_PASS) # A nova senha correta
+    time.sleep(1) # Pausa
+    print("Formulário de login preenchido com as credenciais CORRETAS.")
+
+    login_form = driver.find_element(By.ID, "loginForm")
+    login_button = login_form.find_element(By.CSS_SELECTOR, "button[type='submit']")
+    login_button.click()
+
+    # --- [CORREÇÃO] Esperar pelo ícone do perfil (o que queremos clicar) em vez do 'calculate-btn' ---
+    print("Aguardando página da calculadora carregar (esperando pelo ícone do perfil)...")
     profile_link = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.CLASS_NAME, "profile-link"))
     )
-    profile_link.click()
+    print("SUCESSO: Login com a nova senha efetuado (ícone do perfil está clicável).")
+    # --- [FIM DA CORREÇÃO] ---
+    
+    time.sleep(1.5) # Pausa para visualização
 
-    # 4b. Esperar o nome do perfil carregar E ter o texto esperado
+    print("Verificação final: Checando nome e dashboard...")
+    
+    # --- [CORREÇÃO] Apenas clicamos no elemento que já encontramos ---
+    profile_link.click()
+    # --- [FIM DA CORREÇÃO] ---
+
     expected_name = f"{NEW_FIRST_NAME} {NEW_LAST_NAME}"
     WebDriverWait(driver, 10).until(
         EC.text_to_be_present_in_element((By.CLASS_NAME, "profile-name"), expected_name)
     )
     print(f"VERIFICAÇÃO CONCLUÍDA: O nome no perfil é '{expected_name}'.")
+    time.sleep(1.5)
+
+    print("Navegando para o Dashboard para verificação final...")
+    dashboard_btn = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//button[@data-tab='dashboard']")))
+    dashboard_btn.click()
+    
+    # --- [CORREÇÃO] Adicionando pausa de 1s para resolver race condition do JS ---
+    print("Aguardando 1s para o JS iniciar o fetch do dashboard...")
+    time.sleep(1) 
+    # --- [FIM DA CORREÇÃO] ---
+
+    WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "lineChart")))
+    print("SUCESSO: Dashboard carregado após o login final.")
     time.sleep(3) # Pausa final para visualização
 
 
@@ -501,3 +564,4 @@ finally:
     print("Fim do teste.")
     # A opção 'detach' manterá o navegador aberto.
     # driver.quit()
+
